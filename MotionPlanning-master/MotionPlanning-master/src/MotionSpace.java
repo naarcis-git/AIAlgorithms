@@ -11,7 +11,7 @@ public class MotionSpace extends Canvas {
 
     private int numOfConnections = 5;
 
-    private int RRTMultiplier = 8;
+    private int RRTMultiplier = 1;
     private int optimiseDistance = 40;
 
     private final float scale = 1.3f;
@@ -176,8 +176,8 @@ public class MotionSpace extends Canvas {
         addTarget(g);
 
 //        generatedPoint.add(new Node(null, new Point2D((float)240.0, (float)260.0)));
-        generatedPoint.add(new Node(null, new Point2D((float) 500.0 * scale , (float) 100.0*scale)));
-        generatedPoint.add(new Node(null, new Point2D((float) 270.0 * scale , (float) 270.0*scale + 25)));
+        generatedPoint.add(new Node(null, new Point2D((float) 700 , (float)  -140)));
+        generatedPoint.add(new Node(null, new Point2D((float) 700  , (float) 400)));
 //        generatedPoint.add(new Node(null, new Point2D((float)240.0, (float)270.0)));
         Random rand = new Random();
         boolean gasit = false;
@@ -220,6 +220,7 @@ public class MotionSpace extends Canvas {
 
                 double dist = Math.sqrt((node.point.x - x) * (node.point.x - x) + (node.point.y - y) * (node.point.y - y));
 
+
                 if (dist < 10.0) {
                     tooClose = true;
                 }
@@ -238,10 +239,22 @@ public class MotionSpace extends Canvas {
 
             //calculam noul punct
             double delX = RRTMultiplier * ((x - closestNode.point.x) / closestDistance) ;
-            double delY = RRTMultiplier * ((y - closestNode.point.y) / closestDistance);
+            double delY = RRTMultiplier * ((y - closestNode.point.y) / closestDistance) ;
 
-            float newX = (float) delX + closestNode.point.x+50;
-            float newY = (float) delY + closestNode.point.y;
+            double dist_norm = Math.sqrt(delX * delX + delY * delY);
+
+            float newX;
+            float newY;
+            if (dist_norm < closestDistance) {
+                newX = (float) delX + closestNode.point.x;
+                newY = (float) delY + closestNode.point.y;
+            }
+            else {
+                newX = closestNode.point.x;
+                newY = closestNode.point.y;
+            }
+
+
             boolean collision = false;
 
             Line2D line = new Line2D(closestNode.point.x, closestNode.point.y, newX, newY);

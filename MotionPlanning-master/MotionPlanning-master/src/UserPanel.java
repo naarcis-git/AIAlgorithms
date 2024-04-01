@@ -98,8 +98,8 @@ public class UserPanel extends VBox {
 
         Slider multiplierSlider = new Slider();
         multiplierSlider.setMin(0);
-        multiplierSlider.setMax(30);
-        multiplierSlider.setValue(10);
+        multiplierSlider.setMax(500);
+        multiplierSlider.setValue(500);
         multiplierSlider.setShowTickLabels(true);
         multiplierSlider.setShowTickMarks(true);
         multiplierSlider.setMajorTickUnit(2);
@@ -108,7 +108,7 @@ public class UserPanel extends VBox {
         multiplierSlider.valueProperty().addListener((observable, oldValue, newValue) -> {
             space.setRRTMultiplier(newValue.intValue());
         });
-        multiplierSlider.setPrefWidth(300);
+        multiplierSlider.setPrefWidth(500);
         slider.getChildren().addAll(label, multiplierSlider);
 
         this.getChildren().addAll(addition, clear, strategyBox, obstacleSet, slider);
