@@ -11,8 +11,8 @@ public class MotionSpace extends Canvas {
 
     private int numOfConnections = 5;
 
-    private int RRTMultiplier = 1;
-    private int optimiseDistance = 40;
+    private int RRTMultiplier = 234;
+    private int optimiseDistance = 1000;
 
     private final float scale = 1.3f;
 
@@ -176,8 +176,8 @@ public class MotionSpace extends Canvas {
         addTarget(g);
 
 //        generatedPoint.add(new Node(null, new Point2D((float)240.0, (float)260.0)));
-        generatedPoint.add(new Node(null, new Point2D((float) 700 , (float)  -140)));
-        generatedPoint.add(new Node(null, new Point2D((float) 700  , (float) 400)));
+        generatedPoint.add(new Node(null, new Point2D((float) 700, (float) -140)));
+        generatedPoint.add(new Node(null, new Point2D((float) 700, (float) 400)));
 //        generatedPoint.add(new Node(null, new Point2D((float)240.0, (float)270.0)));
         Random rand = new Random();
         boolean gasit = false;
@@ -238,8 +238,8 @@ public class MotionSpace extends Canvas {
             }
 
             //calculam noul punct
-            double delX = RRTMultiplier * ((x - closestNode.point.x) / closestDistance) ;
-            double delY = RRTMultiplier * ((y - closestNode.point.y) / closestDistance) ;
+            double delX = RRTMultiplier * ((x - closestNode.point.x) / closestDistance);
+            double delY = RRTMultiplier * ((y - closestNode.point.y) / closestDistance);
 
             double dist_norm = Math.sqrt(delX * delX + delY * delY);
 
@@ -248,8 +248,7 @@ public class MotionSpace extends Canvas {
             if (dist_norm < closestDistance) {
                 newX = (float) delX + closestNode.point.x;
                 newY = (float) delY + closestNode.point.y;
-            }
-            else {
+            } else {
                 newX = closestNode.point.x;
                 newY = closestNode.point.y;
             }
@@ -305,7 +304,7 @@ public class MotionSpace extends Canvas {
             }
         }
 
-        Collections.sort(RRTPoints, (a, b) ->  (int)b.point.y - (int)a.point.y);
+        Collections.sort(RRTPoints, (a, b) -> (int) b.point.y - (int) a.point.y);
         g.setStroke(Color.BLACK);
         g.strokeLine((double) RRTPoints.get(1).point.x, (double) RRTPoints.get(1).point.y, (double) RRTPoints.get(0).point.x, (double) RRTPoints.get(0).point.y);
     }
@@ -323,13 +322,24 @@ public class MotionSpace extends Canvas {
     }
 
     public void addRRTStar(int n) {
-        Random rand = new Random();
         GraphicsContext g = getGraphicsContext2D();
+        paintBackground();
 
-        for (int j = 0; j < n; j++) {
+        addTarget(g);
+git add
+        generatedPoint.add(new Node(null, new Point2D((float) 700, (float) -140)));
+        generatedPoint.add(new Node(null, new Point2D((float) 700,  (float) 400)));
+        generatedPoint.add(new Node(null, new Point2D((float) 700,  (float) 100)));
+        RRTPoints.add(new Node(new Point2D(StartAndTargetNode.get(0).point.x, StartAndTargetNode.get(0).point.y)));
+        RRTPoints.add(new Node(new Point2D(StartAndTargetNode.get(1).point.x, StartAndTargetNode.get(1).point.y)));
 
-            int x = rand.nextInt(((int) getWidth()));
-            int y = rand.nextInt(((int) getHeight()));
+
+        int j = 0;
+        while (j < 2) {
+
+            //generare sample
+            int x = (int) generatedPoint.get(j).point.x;
+            int y = (int) generatedPoint.get(j).point.y;
 
             double closestDistance = 99999;
             boolean tooClose = false;
@@ -350,7 +360,6 @@ public class MotionSpace extends Canvas {
                 }
 
             }
-
             if (tooClose || closestNode == null) {
                 continue;
             }
@@ -404,11 +413,6 @@ public class MotionSpace extends Canvas {
 
             int d = 2;
 
-            int r = rand.nextInt(255);
-            int ge = rand.nextInt(255);
-            int b = rand.nextInt(255);
-
-            g.setFill(Color.rgb(r, ge, b));
             g.setFill(Color.BLUE);
             g.fillOval(newX - d, newY - d, 2 * d, 2 * d);
 
@@ -417,10 +421,10 @@ public class MotionSpace extends Canvas {
             g.setStroke(Color.BLACK);
             g.strokeLine(closestNode.point.x, closestNode.point.y, newX, newY);
 
-            if (closestDistance < 15) {
-                x = (int) StartAndTargetNode.get(1).point.x;
-                y = (int) StartAndTargetNode.get(1).point.y;
-            }
+//            if (closestDistance < 15) {
+//                x = (int) StartAndTargetNode.get(1).point.x;
+//                y = (int) StartAndTargetNode.get(1).point.y;
+//            }
 
             boolean changed = false;
             for (Node node : closeNodes) {
@@ -450,6 +454,7 @@ public class MotionSpace extends Canvas {
                 repaintRRT();
             }
 
+            j++;
         }
 
     }

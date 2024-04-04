@@ -98,8 +98,8 @@ public class UserPanel extends VBox {
 
         Slider multiplierSlider = new Slider();
         multiplierSlider.setMin(0);
-        multiplierSlider.setMax(500);
-        multiplierSlider.setValue(500);
+        multiplierSlider.setMax(240);
+        multiplierSlider.setValue(234);
         multiplierSlider.setShowTickLabels(true);
         multiplierSlider.setShowTickMarks(true);
         multiplierSlider.setMajorTickUnit(2);
