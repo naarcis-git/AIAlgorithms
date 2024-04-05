@@ -326,16 +326,15 @@ public class MotionSpace extends Canvas {
         paintBackground();
 
         addTarget(g);
-git add
+
         generatedPoint.add(new Node(null, new Point2D((float) 700, (float) -140)));
-        generatedPoint.add(new Node(null, new Point2D((float) 700,  (float) 400)));
-        generatedPoint.add(new Node(null, new Point2D((float) 700,  (float) 100)));
+        generatedPoint.add(new Node(null, new Point2D((float) 700,  (float) 223)));
+        generatedPoint.add(new Node(null, new Point2D((float) 700,  (float) 300)));
         RRTPoints.add(new Node(new Point2D(StartAndTargetNode.get(0).point.x, StartAndTargetNode.get(0).point.y)));
         RRTPoints.add(new Node(new Point2D(StartAndTargetNode.get(1).point.x, StartAndTargetNode.get(1).point.y)));
 
-
         int j = 0;
-        while (j < 2) {
+        while (j < 3) {
 
             //generare sample
             int x = (int) generatedPoint.get(j).point.x;
