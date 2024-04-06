@@ -94,40 +94,43 @@ public class MotionSpace extends Canvas {
 
     public void addPRM(int n) {
         GraphicsContext g = getGraphicsContext2D();
-        int b = 20;
-
+        int b = 2;
         paintBackground();
 
-//        for(int i = 0; i < PRMPoints.size(); i++){
-//            double x = PRMPoints.get(i).x;
-//            double y = PRMPoints.get(i).y;
-//
-//            g.setFill(Color.BLUE);
-//            g.fillOval(x-b, y-b, 2*b, 2*b);
-//        }
+        addTarget(g);
 
-        for (int i = 0; i < n; i++) {
-            boolean free = false;
-            int x = (int) StartAndTargetNode.get(0).point.x;
-            int y = (int) StartAndTargetNode.get(0).point.y;
+        generatedPoint.add(new Node(null, new Point2D((float) 416, (float) 106)));
+        generatedPoint.add(new Node(null, new Point2D((float) 632, (float) 195)));
+        generatedPoint.add(new Node(null, new Point2D((float) 700, (float) 300)));
+        PRMPoints.add(new Point2D(StartAndTargetNode.get(0).point.x, StartAndTargetNode.get(0).point.y));
 
-            while (!free) {
-                Random r = new Random();
-                x = r.nextInt((int) getWidth());
-                y = r.nextInt((int) getHeight());
+        int j = 0;
+        while (j < 3) {
 
-                free = true;
-                for (RectBounds rect : obstacles) {
-                    if (rect.contains(new Point2D(x, y))) {
-                        free = false;
-                        break;
-                    }
+            boolean free = true;
+            int x = (int) generatedPoint.get(j).point.x;
+            int y = (int) generatedPoint.get(j).point.y;
+
+//            while (!free) {
+//                Random r = new Random();
+//                x =generatedPoint.get(0).point.x;
+//                y = r.nextInt((int) getHeight());
+
+//                free = true;
+            for (RectBounds rect : obstacles) {
+                if (rect.contains(new Point2D(x, y))) {
+                    free = false;
+                    break;
                 }
             }
 
-            g.setFill(Color.BLUE);
-            g.fillOval(x - b, y - b, 2 * b, 2 * b);
-            PRMPoints.add(new Point2D(x, y));
+            if (free) {
+                g.setFill(Color.BLUE);
+                g.fillOval(x - b, y - b, 2 * b, 2 * b);
+                PRMPoints.add(new Point2D(x, y));
+            }
+
+            j++;
         }
     }
 
@@ -135,36 +138,14 @@ public class MotionSpace extends Canvas {
     // creare punct de start si target
     public void addTarget(GraphicsContext g) {
         int b = 6;
-
-
-//        int x = 0;
-//        int y = 0;
-//        Random r = new Random();
-//        x = r.nextInt((int) getWidth());
-//        y = r.nextInt((int) getHeight());
-
         g.setFill(Color.HOTPINK);
-        //g.fillOval(x - b, y - b, 2 * b, 2 * b);
         g.fillOval(240 - b, 260 - b, 2 * b, 2 * b);
-//        PRMPoints.add(new Point2D(x, y));
-
-//        int x1 = 0;
-//        int y1 = 0;
-//        Random r1 = new Random();
-//        x1 = r1.nextInt((int) getWidth());
-//        y1 = r1.nextInt((int) getHeight());
-
-        //g.setFill(Color.GOLD);
-        //g.fillOval(x1 - b, y1 - b, 2 * b, 2 * b);
-
 
         g.setFill(Color.GOLD);
-        g.fillOval(240 - b, 450 - b, 2 * b, 2 * b);
-//        StartAndTargetNode.add(new Node(null, new Point2D(x, y)));
-//        StartAndTargetNode.add(new Node(null, new Point2D(x1, y1)));
+        g.fillOval(350 - b, 400 - b, 2 * b, 2 * b);
 
         StartAndTargetNode.add(new Node(null, new Point2D(240, 260)));
-        StartAndTargetNode.add(new Node(null, new Point2D(240, 450)));
+        StartAndTargetNode.add(new Node(null, new Point2D(350, 400)));
     }
 
     public void addRRT(int n) {
@@ -175,21 +156,13 @@ public class MotionSpace extends Canvas {
         // se pun puctele de start si target- dar ast dupa ce background-ul e setat
         addTarget(g);
 
-//        generatedPoint.add(new Node(null, new Point2D((float)240.0, (float)260.0)));
         generatedPoint.add(new Node(null, new Point2D((float) 700, (float) -140)));
-        generatedPoint.add(new Node(null, new Point2D((float) 700, (float) 400)));
-//        generatedPoint.add(new Node(null, new Point2D((float)240.0, (float)270.0)));
-        Random rand = new Random();
-        boolean gasit = false;
+        generatedPoint.add(new Node(null, new Point2D((float) 700, (float) 223)));
+        generatedPoint.add(new Node(null, new Point2D((float) 700, (float) 300)));
         RRTPoints.add(new Node(new Point2D(StartAndTargetNode.get(0).point.x, StartAndTargetNode.get(0).point.y)));
-        RRTPoints.add(new Node(new Point2D(StartAndTargetNode.get(1).point.x, StartAndTargetNode.get(1).point.y)));
 
         int j = 0;
-        while (j < 2) {
-
-            System.out.println("jjjjjj" + j);
-
-
+        while (j < 3) {
             //generare sample
             int x = (int) generatedPoint.get(j).point.x;
             int y = (int) generatedPoint.get(j).point.y;
@@ -200,38 +173,17 @@ public class MotionSpace extends Canvas {
             boolean distanceOk = true;
 
             for (Node node : RRTPoints) {
-
-                //calcul distanta
-//                double distTrget = Math.sqrt((StartAndTargetNode.get(1).point.x - x) * (StartAndTargetNode.get(1).point.x - x) + (StartAndTargetNode.get(1).point.y - y) * (StartAndTargetNode.get(1).point.y - y));
-//                double distTargetStart = Math.sqrt((StartAndTargetNode.get(1).point.x - StartAndTargetNode.get(0).point.x) * (StartAndTargetNode.get(1).point.x - StartAndTargetNode.get(0).point.x) + (StartAndTargetNode.get(1).point.y - StartAndTargetNode.get(0).point.y) * (StartAndTargetNode.get(1).point.y - StartAndTargetNode.get(0).point.y));
-//                if (distTargetStart > distTrget ) {
-//
-//                    int d = 2;
-//
-//                    //g.setFill(Color.BLUE);
-//                    //g.fillOval(StartAndTargetNode.get(1).point.x - d, StartAndTargetNode.get(1).point.y - d, 2 * d, 2 * d);
-//
-//                    //RRTPoints.add(new Node(closestNode, new Point2D(StartAndTargetNode.get(1).point.x, StartAndTargetNode.get(1).point.y)));
-//
-//                } else {
-//                    distanceOk = false;
-//                    break;
-//                }
-
                 double dist = Math.sqrt((node.point.x - x) * (node.point.x - x) + (node.point.y - y) * (node.point.y - y));
-
 
                 if (dist < 10.0) {
                     tooClose = true;
                 }
-
 
                 // sa nu fie prea aproape
                 if (dist < closestDistance) {
                     closestDistance = dist;
                     closestNode = node;
                 }
-
             }
             if (!distanceOk || tooClose || closestNode == null) {
                 continue;
@@ -241,18 +193,8 @@ public class MotionSpace extends Canvas {
             double delX = RRTMultiplier * ((x - closestNode.point.x) / closestDistance);
             double delY = RRTMultiplier * ((y - closestNode.point.y) / closestDistance);
 
-            double dist_norm = Math.sqrt(delX * delX + delY * delY);
-
-            float newX;
-            float newY;
-            if (dist_norm < closestDistance) {
-                newX = (float) delX + closestNode.point.x;
-                newY = (float) delY + closestNode.point.y;
-            } else {
-                newX = closestNode.point.x;
-                newY = closestNode.point.y;
-            }
-
+            float newX = (float) delX + closestNode.point.x;
+            float newY = (float) delY + closestNode.point.y;
 
             boolean collision = false;
 
@@ -306,7 +248,8 @@ public class MotionSpace extends Canvas {
 
         Collections.sort(RRTPoints, (a, b) -> (int) b.point.y - (int) a.point.y);
         g.setStroke(Color.BLACK);
-        g.strokeLine((double) RRTPoints.get(1).point.x, (double) RRTPoints.get(1).point.y, (double) RRTPoints.get(0).point.x, (double) RRTPoints.get(0).point.y);
+        g.strokeLine((double) StartAndTargetNode.get(1).point.x, (double) StartAndTargetNode.get(1).point.y,
+                (double) RRTPoints.get(0).point.x, (double) RRTPoints.get(0).point.y);
     }
 
     public void colorPathRRT() {
@@ -328,10 +271,9 @@ public class MotionSpace extends Canvas {
         addTarget(g);
 
         generatedPoint.add(new Node(null, new Point2D((float) 700, (float) -140)));
-        generatedPoint.add(new Node(null, new Point2D((float) 700,  (float) 223)));
-        generatedPoint.add(new Node(null, new Point2D((float) 700,  (float) 300)));
+        generatedPoint.add(new Node(null, new Point2D((float) 700, (float) 223)));
+        generatedPoint.add(new Node(null, new Point2D((float) 700, (float) 300)));
         RRTPoints.add(new Node(new Point2D(StartAndTargetNode.get(0).point.x, StartAndTargetNode.get(0).point.y)));
-        RRTPoints.add(new Node(new Point2D(StartAndTargetNode.get(1).point.x, StartAndTargetNode.get(1).point.y)));
 
         int j = 0;
         while (j < 3) {
@@ -420,11 +362,6 @@ public class MotionSpace extends Canvas {
             g.setStroke(Color.BLACK);
             g.strokeLine(closestNode.point.x, closestNode.point.y, newX, newY);
 
-//            if (closestDistance < 15) {
-//                x = (int) StartAndTargetNode.get(1).point.x;
-//                y = (int) StartAndTargetNode.get(1).point.y;
-//            }
-
             boolean changed = false;
             for (Node node : closeNodes) {
 
@@ -456,6 +393,10 @@ public class MotionSpace extends Canvas {
             j++;
         }
 
+        Collections.sort(RRTPoints, (a, b) -> (int) b.point.y - (int) a.point.y);
+        g.setStroke(Color.BLACK);
+        g.strokeLine((double) StartAndTargetNode.get(1).point.x, (double) StartAndTargetNode.get(1).point.y,
+                (double) RRTPoints.get(0).point.x, (double) RRTPoints.get(0).point.y);
     }
 
     public void connect() {
@@ -519,7 +460,6 @@ public class MotionSpace extends Canvas {
     public void reset() {
         RRTPoints.clear();
         PRMPoints.clear();
-//        RRTPoints.add(new Node(new Point2D(250,250)));
         paintBackground();
     }
 
