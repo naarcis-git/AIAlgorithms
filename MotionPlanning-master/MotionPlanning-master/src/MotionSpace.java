@@ -33,7 +33,7 @@ public class MotionSpace extends Canvas {
         this.size = size;
 
         List<RectBounds> r1 = new ArrayList<>();
-        r1.add(new RectBounds(300, 250, 400, 300));
+        r1.add(new RectBounds(300, 250, 400, 350));
         r1.add(new RectBounds(300, 50, 400, 100));
 
         List<RectBounds> r2 = new ArrayList<>();
@@ -142,10 +142,10 @@ public class MotionSpace extends Canvas {
         g.fillOval(240 - b, 260 - b, 2 * b, 2 * b);
 
         g.setFill(Color.GOLD);
-        g.fillOval(350 - b, 400 - b, 2 * b, 2 * b);
+        g.fillOval(350 - b, 450 - b, 2 * b, 2 * b);
 
         StartAndTargetNode.add(new Node(null, new Point2D(240, 260)));
-        StartAndTargetNode.add(new Node(null, new Point2D(350, 400)));
+        StartAndTargetNode.add(new Node(null, new Point2D(350, 450)));
     }
 
     public void addRRT(int n) {
@@ -159,10 +159,12 @@ public class MotionSpace extends Canvas {
         generatedPoint.add(new Node(null, new Point2D((float) 700, (float) -140)));
         generatedPoint.add(new Node(null, new Point2D((float) 700, (float) 223)));
         generatedPoint.add(new Node(null, new Point2D((float) 700, (float) 300)));
+        generatedPoint.add(new Node(null, new Point2D(StartAndTargetNode.get(1).point.x,
+                StartAndTargetNode.get(1).point.y)));
         RRTPoints.add(new Node(new Point2D(StartAndTargetNode.get(0).point.x, StartAndTargetNode.get(0).point.y)));
 
         int j = 0;
-        while (j < 3) {
+        while (j < 4) {
             //generare sample
             int x = (int) generatedPoint.get(j).point.x;
             int y = (int) generatedPoint.get(j).point.y;
@@ -246,10 +248,10 @@ public class MotionSpace extends Canvas {
             }
         }
 
-        Collections.sort(RRTPoints, (a, b) -> (int) b.point.y - (int) a.point.y);
-        g.setStroke(Color.BLACK);
-        g.strokeLine((double) StartAndTargetNode.get(1).point.x, (double) StartAndTargetNode.get(1).point.y,
-                (double) RRTPoints.get(0).point.x, (double) RRTPoints.get(0).point.y);
+//        Collections.sort(RRTPoints, (a, b) -> (int) b.point.y - (int) a.point.y);
+//        g.setStroke(Color.BLACK);
+//        g.strokeLine((double) StartAndTargetNode.get(1).point.x, (double) StartAndTargetNode.get(1).point.y,
+//                (double) RRTPoints.get(0).point.x, (double) RRTPoints.get(0).point.y);
     }
 
     public void colorPathRRT() {
@@ -273,10 +275,13 @@ public class MotionSpace extends Canvas {
         generatedPoint.add(new Node(null, new Point2D((float) 700, (float) -140)));
         generatedPoint.add(new Node(null, new Point2D((float) 700, (float) 223)));
         generatedPoint.add(new Node(null, new Point2D((float) 700, (float) 300)));
+        generatedPoint.add(new Node(null, new Point2D(StartAndTargetNode.get(1).point.x,
+                StartAndTargetNode.get(1).point.y)));
         RRTPoints.add(new Node(new Point2D(StartAndTargetNode.get(0).point.x, StartAndTargetNode.get(0).point.y)));
 
+
         int j = 0;
-        while (j < 3) {
+        while (j < 4) {
 
             //generare sample
             int x = (int) generatedPoint.get(j).point.x;
@@ -286,6 +291,7 @@ public class MotionSpace extends Canvas {
             boolean tooClose = false;
 
             Node closestNode = null;
+            boolean isContinuity;
 
             for (Node node : RRTPoints) {
 
@@ -296,8 +302,17 @@ public class MotionSpace extends Canvas {
                 }
 
                 if (dist < closestDistance) {
-                    closestDistance = dist;
-                    closestNode = node;
+                    isContinuity = true;
+                    if (node.point.x == StartAndTargetNode.get(1).point.x &&
+                            node.point.y == StartAndTargetNode.get(1).point.y) {
+                        isContinuity = checkContinuity(new Node(null, new Point2D(x, y)));
+
+                    }
+
+                    if (isContinuity) {
+                        closestDistance = dist;
+                        closestNode = node;
+                    }
                 }
 
             }
@@ -319,8 +334,16 @@ public class MotionSpace extends Canvas {
                 double dist = Math.sqrt((node.point.x - newX) * (node.point.x - newX) + (node.point.y - newY) * (node.point.y - newY));
 
                 if (dist < maxDist) {
-                    node.helper = dist;
-                    closeNodes.add(node);
+                    isContinuity = true;
+                    if (node.point.x == StartAndTargetNode.get(1).point.x &&
+                            node.point.y == StartAndTargetNode.get(1).point.y) {
+                        isContinuity = checkContinuity(new Node(null, new Point2D(x, y)));
+
+                    }
+                    if (isContinuity) {
+                        node.helper = dist;
+                        closeNodes.add(node);
+                    }
                 }
 
             }
@@ -393,10 +416,10 @@ public class MotionSpace extends Canvas {
             j++;
         }
 
-        Collections.sort(RRTPoints, (a, b) -> (int) b.point.y - (int) a.point.y);
-        g.setStroke(Color.BLACK);
-        g.strokeLine((double) StartAndTargetNode.get(1).point.x, (double) StartAndTargetNode.get(1).point.y,
-                (double) RRTPoints.get(0).point.x, (double) RRTPoints.get(0).point.y);
+//        Collections.sort(RRTPoints, (a, b) -> (int) b.point.y - (int) a.point.y);
+//        g.setStroke(Color.BLACK);
+//        g.strokeLine((double) StartAndTargetNode.get(1).point.x, (double) StartAndTargetNode.get(1).point.y,
+//                (double) RRTPoints.get(0).point.x, (double) RRTPoints.get(0).point.y);
     }
 
     public void connect() {
@@ -470,5 +493,19 @@ public class MotionSpace extends Canvas {
 
     public void setRRTMultiplier(int m) {
         RRTMultiplier = m;
+    }
+
+
+    public boolean checkContinuity(Node currentNode) {
+        boolean ok = false;
+        int i = 0;
+        while (ok == false && i < RRTPoints.size()) {
+            Node node = RRTPoints.get(i);
+            if (node.parent != null && node.parent.point.x == currentNode.point.x && node.parent.point.y == currentNode.point.y) {
+                ok = true;
+            }
+            i++;
+        }
+        return ok;
     }
 }
