@@ -142,29 +142,35 @@ public class MotionSpace extends Canvas {
         g.fillOval(240 - b, 260 - b, 2 * b, 2 * b);
 
         g.setFill(Color.GOLD);
-        g.fillOval(350 - b, 450 - b, 2 * b, 2 * b);
+        g.fillOval(370 - b, 450 - b, 2 * b, 2 * b);
 
         StartAndTargetNode.add(new Node(null, new Point2D(240, 260)));
-        StartAndTargetNode.add(new Node(null, new Point2D(350, 450)));
+        StartAndTargetNode.add(new Node(null, new Point2D(370, 450)));
     }
 
     public void addRRT(int n) {
         // se creaza background = se seteaza daca e cazul obstacolele
         GraphicsContext g = getGraphicsContext2D();
         paintBackground();
+        Map<Integer, Double> historyRoad = new HashMap<>();
+        List<Double> distanceList = new ArrayList<>();
+
+        Node intermediate = new Node(null);
 
         // se pun puctele de start si target- dar ast dupa ce background-ul e setat
         addTarget(g);
 
         generatedPoint.add(new Node(null, new Point2D((float) 700, (float) -140)));
         generatedPoint.add(new Node(null, new Point2D((float) 700, (float) 223)));
-        generatedPoint.add(new Node(null, new Point2D((float) 700, (float) 300)));
+        generatedPoint.add(new Node(null, new Point2D((float) 626, (float) 250)));
         generatedPoint.add(new Node(null, new Point2D(StartAndTargetNode.get(1).point.x,
                 StartAndTargetNode.get(1).point.y)));
         RRTPoints.add(new Node(new Point2D(StartAndTargetNode.get(0).point.x, StartAndTargetNode.get(0).point.y)));
 
         int j = 0;
         while (j < 4) {
+            historyRoad.clear();
+            distanceList.clear();
             //generare sample
             int x = (int) generatedPoint.get(j).point.x;
             int y = (int) generatedPoint.get(j).point.y;
@@ -174,60 +180,60 @@ public class MotionSpace extends Canvas {
             boolean tooClose = false;
             boolean distanceOk = true;
 
-            for (Node node : RRTPoints) {
+            for (int i = 0; i < RRTPoints.size(); i++) {
+                Node node = RRTPoints.get(i);
                 double dist = Math.sqrt((node.point.x - x) * (node.point.x - x) + (node.point.y - y) * (node.point.y - y));
 
                 if (dist < 10.0) {
                     tooClose = true;
                 }
+                // keep the history of all roads
+                historyRoad.put(i, dist);
+                distanceList.add(dist);
 
+                if (closestNode != null && (dist < closestDistance)) {
+                    intermediate = closestNode;
+                }
                 // sa nu fie prea aproape
                 if (dist < closestDistance) {
                     closestDistance = dist;
                     closestNode = node;
                 }
             }
+
             if (!distanceOk || tooClose || closestNode == null) {
                 continue;
             }
 
-            //calculam noul punct
-            double delX = RRTMultiplier * ((x - closestNode.point.x) / closestDistance);
-            double delY = RRTMultiplier * ((y - closestNode.point.y) / closestDistance);
+            historyRoad.entrySet().stream().sorted(
+                    new Comparator<Map.Entry<Integer, Double>>() {
+                        @Override
+                        public int compare(Map.Entry<Integer, Double> o1, Map.Entry<Integer, Double> o2) {
+                            return (int) (o1.getValue() - o2.getValue());
+                        }
+                    }
+            );
 
-            float newX = (float) delX + closestNode.point.x;
-            float newY = (float) delY + closestNode.point.y;
+            Collections.sort(distanceList);
 
-            boolean collision = false;
+            boolean found = false;
+            int index = 0;
+            while (!found && index < distanceList.size()) {
+                //calculam noul punct
+                int pozClosest = positionByDistance(distanceList.get(index), historyRoad);
+                double disClosest = distanceList.get(index);
+                double delX = RRTMultiplier * ((x - RRTPoints.get(pozClosest).point.x) / disClosest);
+                double delY = RRTMultiplier * ((y - RRTPoints.get(pozClosest).point.y) / disClosest);
 
-            Line2D line = new Line2D(closestNode.point.x, closestNode.point.y, newX, newY);
-            Iterator var19 = this.obstacles.iterator();
+                float newX = (float) delX + RRTPoints.get(pozClosest).point.x;
+                float newY = (float) delY + RRTPoints.get(pozClosest).point.y;
 
-            RectBounds r;
-            while (var19.hasNext()) {
-                r = (RectBounds) var19.next();
-                if (line.intersects(r)) {
-                    collision = true;
-                    break;
-                }
-            }
+                boolean collision = false;
 
-            byte d;
-            if (!collision) {
-                d = 2;
-                g.setFill(Color.BLUE);
-                g.fillOval((double) (newX - (float) d), (double) (newY - (float) d), (double) (2 * d), (double) (2 * d));
-                this.RRTPoints.add(new Node(closestNode, new Point2D(newX, newY)));
-                g.setStroke(Color.BLACK);
-                g.strokeLine((double) closestNode.point.x, (double) closestNode.point.y, (double) newX, (double) newY);
-                j++;
-            } else {
-                collision = false;
-                newX = (float) delX / 2.0F + closestNode.point.x;
-                newY = (float) delY / 2.0F + closestNode.point.y;
-                line = new Line2D(closestNode.point.x, closestNode.point.y, newX, newY);
-                var19 = this.obstacles.iterator();
+                Line2D line = new Line2D(RRTPoints.get(pozClosest).point.x, RRTPoints.get(pozClosest).point.y, newX, newY);
+                Iterator var19 = this.obstacles.iterator();
 
+                RectBounds r;
                 while (var19.hasNext()) {
                     r = (RectBounds) var19.next();
                     if (line.intersects(r)) {
@@ -236,22 +242,21 @@ public class MotionSpace extends Canvas {
                     }
                 }
 
+                byte d;
                 if (!collision) {
                     d = 2;
                     g.setFill(Color.BLUE);
                     g.fillOval((double) (newX - (float) d), (double) (newY - (float) d), (double) (2 * d), (double) (2 * d));
-                    this.RRTPoints.add(new Node(closestNode, new Point2D(newX, newY)));
+                    this.RRTPoints.add(new Node(RRTPoints.get(pozClosest), new Point2D(newX, newY)));
                     g.setStroke(Color.BLACK);
-                    g.strokeLine((double) closestNode.point.x, (double) closestNode.point.y, (double) newX, (double) newY);
+                    g.strokeLine((double) RRTPoints.get(pozClosest).point.x, (double) RRTPoints.get(pozClosest).point.y, (double) newX, (double) newY);
                     j++;
+                    found = true;
+                } else {
+                    index++;
                 }
             }
         }
-
-//        Collections.sort(RRTPoints, (a, b) -> (int) b.point.y - (int) a.point.y);
-//        g.setStroke(Color.BLACK);
-//        g.strokeLine((double) StartAndTargetNode.get(1).point.x, (double) StartAndTargetNode.get(1).point.y,
-//                (double) RRTPoints.get(0).point.x, (double) RRTPoints.get(0).point.y);
     }
 
     public void colorPathRRT() {
@@ -274,7 +279,7 @@ public class MotionSpace extends Canvas {
 
         generatedPoint.add(new Node(null, new Point2D((float) 700, (float) -140)));
         generatedPoint.add(new Node(null, new Point2D((float) 700, (float) 223)));
-        generatedPoint.add(new Node(null, new Point2D((float) 700, (float) 300)));
+        generatedPoint.add(new Node(null, new Point2D((float) 626, (float) 250)));
         generatedPoint.add(new Node(null, new Point2D(StartAndTargetNode.get(1).point.x,
                 StartAndTargetNode.get(1).point.y)));
         RRTPoints.add(new Node(new Point2D(StartAndTargetNode.get(0).point.x, StartAndTargetNode.get(0).point.y)));
@@ -507,5 +512,16 @@ public class MotionSpace extends Canvas {
             i++;
         }
         return ok;
+    }
+
+    public int positionByDistance(Double distance, Map<Integer, Double> map) {
+        int poz = 0;
+
+        for (Integer key : map.keySet()) {
+            if (map.get(key).equals(distance))
+                poz = key;
+        }
+
+        return poz;
     }
 }
