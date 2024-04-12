@@ -99,13 +99,15 @@ public class MotionSpace extends Canvas {
 
         addTarget(g);
 
-        generatedPoint.add(new Node(null, new Point2D((float) 416, (float) 106)));
-        generatedPoint.add(new Node(null, new Point2D((float) 632, (float) 195)));
-        generatedPoint.add(new Node(null, new Point2D((float) 700, (float) 300)));
-        PRMPoints.add(new Point2D(StartAndTargetNode.get(0).point.x, StartAndTargetNode.get(0).point.y));
+        generatedPoint.add(new Node(null, new Point2D( StartAndTargetNode.get(0).point.x,  StartAndTargetNode.get(0).point.y)));
+        generatedPoint.add(new Node(null, new Point2D( StartAndTargetNode.get(0).point.x+176,  StartAndTargetNode.get(0).point.y-154)));
+        generatedPoint.add(new Node(null, new Point2D( StartAndTargetNode.get(0).point.x+392,  StartAndTargetNode.get(0).point.y-65)));
+        generatedPoint.add(new Node(null, new Point2D( StartAndTargetNode.get(0).point.x+363,  StartAndTargetNode.get(0).point.y+167)));
+        generatedPoint.add(new Node(null, new Point2D( StartAndTargetNode.get(0).point.x+130,  StartAndTargetNode.get(0).point.y+189)));
+        RRTPoints.add(new Node(new Point2D(StartAndTargetNode.get(0).point.x, StartAndTargetNode.get(0).point.y)));
 
         int j = 0;
-        while (j < 3) {
+        while (j < 5) {
 
             boolean free = true;
             int x = (int) generatedPoint.get(j).point.x;
@@ -175,10 +177,7 @@ public class MotionSpace extends Canvas {
             int x = (int) generatedPoint.get(j).point.x;
             int y = (int) generatedPoint.get(j).point.y;
 
-            double closestDistance = 999999;
-            Node closestNode = null;
             boolean tooClose = false;
-            boolean distanceOk = true;
 
             for (int i = 0; i < RRTPoints.size(); i++) {
                 Node node = RRTPoints.get(i);
@@ -190,18 +189,9 @@ public class MotionSpace extends Canvas {
                 // keep the history of all roads
                 historyRoad.put(i, dist);
                 distanceList.add(dist);
-
-                if (closestNode != null && (dist < closestDistance)) {
-                    intermediate = closestNode;
-                }
-                // sa nu fie prea aproape
-                if (dist < closestDistance) {
-                    closestDistance = dist;
-                    closestNode = node;
-                }
             }
 
-            if (!distanceOk || tooClose || closestNode == null) {
+            if ( tooClose ) {
                 continue;
             }
 
