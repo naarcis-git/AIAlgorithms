@@ -93,7 +93,7 @@ public class MotionSpace extends Canvas {
         }
     }
 
-    public void addPRM(int n) {
+    public void addPRM() {
         GraphicsContext g = getGraphicsContext2D();
         int b = 2;
         paintBackground();
@@ -102,11 +102,49 @@ public class MotionSpace extends Canvas {
 
         addTarget(g);
 
-        generatedPoint.add(new Node(null, new Point2D(StartAndTargetNode.get(0).point.x, StartAndTargetNode.get(0).point.y)));
-        generatedPoint.add(new Node(null, new Point2D(StartAndTargetNode.get(0).point.x + 176, StartAndTargetNode.get(0).point.y - 154)));
-        generatedPoint.add(new Node(null, new Point2D(StartAndTargetNode.get(0).point.x + 392, StartAndTargetNode.get(0).point.y - 65)));
-        generatedPoint.add(new Node(null, new Point2D(StartAndTargetNode.get(0).point.x + 363, StartAndTargetNode.get(0).point.y + 167)));
-        generatedPoint.add(new Node(null, new Point2D(StartAndTargetNode.get(0).point.x + 130, StartAndTargetNode.get(0).point.y + 189)));
+        generatedPoint = UserPanel.CoordonateAlgorithms.getGeneratedPoint();
+
+        int j = 0;
+        while (j < 5) {
+
+            boolean free = true;
+            int x = (int) generatedPoint.get(j).point.x;
+            int y = (int) generatedPoint.get(j).point.y;
+
+            for (RectBounds rect : obstacles) {
+                if (rect.contains(new Point2D(x, y))) {
+                    free = false;
+                    break;
+                }
+            }
+
+            if (free) {
+                g.setFill(Color.BLUE);
+                g.fillOval(x - b, y - b, 2 * b, 2 * b);
+                PRMPoints.add(new Point2D(x, y));
+            }
+
+            j++;
+        }
+
+        connect();
+        aStar(listAStar.get(0), listAStar.get(listAStar.size() - 1));
+        paintPRM(listAStar.get(listAStar.size() - 1));
+
+        PRMPoints.clear();
+        generatedPoint.clear();
+        listAStar.clear();
+    }
+    public void addPRMforCase2a() {
+        GraphicsContext g = getGraphicsContext2D();
+        int b = 2;
+        paintBackground();
+        g.setLineWidth(1.0);
+        g.setLineDashes(1);
+
+        addTarget(g);
+
+        generatedPoint = UserPanel.CoordonateAlgorithms.getGeneratedPoint();
 
         int j = 0;
         while (j < 5) {
@@ -153,7 +191,7 @@ public class MotionSpace extends Canvas {
         StartAndTargetNode.add(new Node(null, new Point2D(370, 450)));
     }
 
-    public void addRRT(int n) {
+    public void addRRT() {
         // se creaza background = se seteaza daca e cazul obstacolele
         GraphicsContext g = getGraphicsContext2D();
         paintBackground();
@@ -164,20 +202,119 @@ public class MotionSpace extends Canvas {
         Map<Integer, Double> historyRoad = new HashMap<>();
         List<Double> distanceList = new ArrayList<>();
 
-        Node intermediate = new Node(null);
+//        Node intermediate = new Node(null); // for what purpose or must be deleted?
 
-        // se pun puctele de start si target- dar ast dupa ce background-ul e setat
+        // se pun punctele de start si target- dar ast dupa ce background-ul e setat
         addTarget(g);
 
-        generatedPoint.add(new Node(null, new Point2D((float) 700, (float) -140)));
-        generatedPoint.add(new Node(null, new Point2D((float) 700, (float) 223)));
-        generatedPoint.add(new Node(null, new Point2D((float) 626, (float) 250)));
-        generatedPoint.add(new Node(null, new Point2D(StartAndTargetNode.get(1).point.x,
-                StartAndTargetNode.get(1).point.y)));
+        generatedPoint = UserPanel.CoordonateAlgorithms.getGeneratedPoint();
+
         RRTPoints.add(new Node(new Point2D(StartAndTargetNode.get(0).point.x, StartAndTargetNode.get(0).point.y)));
 
         int j = 0;
         while (j < 4) {
+            historyRoad.clear();
+            distanceList.clear();
+            //generare sample
+            int x = (int) generatedPoint.get(j).point.x;
+            int y = (int) generatedPoint.get(j).point.y;
+
+            boolean tooClose = false;
+
+            for (int i = 0; i < RRTPoints.size(); i++) {
+                Node node = RRTPoints.get(i);
+                double dist = Math.sqrt((node.point.x - x) * (node.point.x - x) + (node.point.y - y) * (node.point.y - y));
+
+                if (dist < 10.0) {
+                    tooClose = true;
+                }
+                // keep the history of all roads
+                historyRoad.put(i, dist);
+                distanceList.add(dist);
+            }
+
+            if (tooClose) {
+                continue;
+            }
+
+            historyRoad.entrySet().stream().sorted(
+                    new Comparator<Map.Entry<Integer, Double>>() {
+                        @Override
+                        public int compare(Map.Entry<Integer, Double> o1, Map.Entry<Integer, Double> o2) {
+                            return (int) (o1.getValue() - o2.getValue());
+                        }
+                    }
+            );
+
+            Collections.sort(distanceList);
+
+            boolean found = false;
+            int index = 0;
+            while (!found && index < distanceList.size()) {
+                //calculam noul punct
+                int pozClosest = positionByDistance(distanceList.get(index), historyRoad);
+                double disClosest = distanceList.get(index);
+                double delX = RRTMultiplier * ((x - RRTPoints.get(pozClosest).point.x) / disClosest);
+                double delY = RRTMultiplier * ((y - RRTPoints.get(pozClosest).point.y) / disClosest);
+
+                float newX = (float) delX + RRTPoints.get(pozClosest).point.x;
+                float newY = (float) delY + RRTPoints.get(pozClosest).point.y;
+
+                boolean collision = false;
+
+                Line2D line = new Line2D(RRTPoints.get(pozClosest).point.x, RRTPoints.get(pozClosest).point.y, newX, newY);
+                Iterator var19 = this.obstacles.iterator();
+
+                RectBounds r;
+                while (var19.hasNext()) {
+                    r = (RectBounds) var19.next();
+                    if (line.intersects(r)) {
+                        collision = true;
+                        break;
+                    }
+                }
+
+                byte d;
+                if (!collision) {
+                    d = 2;
+                    g.setFill(Color.BLUE);
+                    g.fillOval((double) (newX - (float) d), (double) (newY - (float) d), (double) (2 * d), (double) (2 * d));
+                    this.RRTPoints.add(new Node(RRTPoints.get(pozClosest), new Point2D(newX, newY)));
+                    g.setStroke(Color.BROWN);
+                    g.strokeLine((double) RRTPoints.get(pozClosest).point.x, (double) RRTPoints.get(pozClosest).point.y, (double) newX, (double) newY);
+                    j++;
+                    found = true;
+                } else {
+                    index++;
+                }
+            }
+        }
+
+        RRTPoints.clear();
+        generatedPoint.clear();
+    }
+ public void addRRTforCase2a() {
+        // se creaza background = se seteaza daca e cazul obstacolele
+        GraphicsContext g = getGraphicsContext2D();
+        paintBackground();
+
+        g.setLineWidth(1.0);
+        g.setLineDashes(1);
+
+        Map<Integer, Double> historyRoad = new HashMap<>();
+        List<Double> distanceList = new ArrayList<>();
+
+//        Node intermediate = new Node(null); // for what purpose or must be deleted?
+
+        // se pun punctele de start si target- dar ast dupa ce background-ul e setat
+        addTarget(g);
+
+        generatedPoint = UserPanel.CoordonateAlgorithms.getGeneratedPoint();
+
+        RRTPoints.add(new Node(new Point2D(StartAndTargetNode.get(0).point.x, StartAndTargetNode.get(0).point.y)));
+
+        int j = 0;
+        while (j < 3) {
             historyRoad.clear();
             distanceList.clear();
             //generare sample
@@ -271,7 +408,7 @@ public class MotionSpace extends Canvas {
         }
     }
 
-    public void addRRTStar(int n) {
+    public void addRRTStar() {
         GraphicsContext g = getGraphicsContext2D();
         paintBackground();
         g.setLineWidth(1.0);
@@ -279,15 +416,161 @@ public class MotionSpace extends Canvas {
 
         addTarget(g);
 
-        generatedPoint.add(new Node(null, new Point2D((float) 700, (float) -140)));
-        generatedPoint.add(new Node(null, new Point2D((float) 700, (float) 223)));
-        generatedPoint.add(new Node(null, new Point2D((float) 626, (float) 250)));
-        generatedPoint.add(new Node(null, new Point2D(StartAndTargetNode.get(1).point.x,
-                StartAndTargetNode.get(1).point.y)));
+        generatedPoint = UserPanel.CoordonateAlgorithms.getGeneratedPoint();
+
         RRTPoints.add(new Node(new Point2D(StartAndTargetNode.get(0).point.x, StartAndTargetNode.get(0).point.y)));
 
         int j = 0;
         while (j < 4) {
+
+            //generare sample
+            int x = (int) generatedPoint.get(j).point.x;
+            int y = (int) generatedPoint.get(j).point.y;
+
+            double closestDistance = 99999;
+            boolean tooClose = false;
+
+            Node closestNode = null;
+            boolean isContinuity;
+
+            for (Node node : RRTPoints) {
+
+                double dist = Math.sqrt((node.point.x - x) * (node.point.x - x) + (node.point.y - y) * (node.point.y - y));
+
+                if (dist < 10) {
+                    tooClose = true;
+                }
+
+                if (dist < closestDistance) {
+                    isContinuity = true;
+                    if (node.point.x == StartAndTargetNode.get(1).point.x &&
+                            node.point.y == StartAndTargetNode.get(1).point.y) {
+                        isContinuity = checkContinuity(new Node(null, new Point2D(x, y)));
+
+                    }
+
+                    if (isContinuity) {
+                        closestDistance = dist;
+                        closestNode = node;
+                    }
+                }
+
+            }
+            if (tooClose || closestNode == null) {
+                continue;
+            }
+
+            double delX = RRTMultiplier * ((x - closestNode.point.x) / closestDistance);
+            double delY = RRTMultiplier * ((y - closestNode.point.y) / closestDistance);
+
+            float newX = (float) delX + closestNode.point.x;
+            float newY = (float) delY + closestNode.point.y;
+
+            List<Node> closeNodes = new ArrayList<>();
+            int maxDist = optimiseDistance;
+
+            for (Node node : RRTPoints) {
+
+                double dist = Math.sqrt((node.point.x - newX) * (node.point.x - newX) + (node.point.y - newY) * (node.point.y - newY));
+
+                if (dist < maxDist) {
+                    isContinuity = true;
+                    if (node.point.x == StartAndTargetNode.get(1).point.x &&
+                            node.point.y == StartAndTargetNode.get(1).point.y) {
+                        isContinuity = checkContinuity(new Node(null, new Point2D(x, y)));
+
+                    }
+                    if (isContinuity) {
+                        node.helper = dist;
+                        closeNodes.add(node);
+                    }
+                }
+            }
+
+            closestNode = null;
+            double smallestDist = 9999;
+
+            for (Node node : closeNodes) {
+
+                boolean collision = false;
+                Line2D line = new Line2D(node.point.x, node.point.y, newX, newY);
+                for (RectBounds r : obstacles) {
+                    if (line.intersects(r)) {
+                        collision = true;
+                        break;
+                    }
+                }
+                if (!collision) {
+                    if (node.distance + node.helper < smallestDist) {
+                        smallestDist = node.distance + node.helper;
+                        closestNode = node;
+                    }
+                }
+            }
+
+            if (closestNode == null) {
+                continue;
+            }
+
+            Node toAdd;
+
+            int d = 2;
+
+            g.setFill(Color.BLUE);
+            g.fillOval(newX - d, newY - d, 2 * d, 2 * d);
+
+            toAdd = new Node(closestNode, new Point2D(newX, newY));
+            RRTPoints.add(toAdd);
+            g.setStroke(Color.BLACK);
+            g.strokeLine(closestNode.point.x, closestNode.point.y, newX, newY);
+
+            boolean changed = false;
+            for (Node node : closeNodes) {
+
+                if (node.helper + toAdd.distance < node.distance) {
+
+                    boolean canConnect = true;
+                    Line2D line = new Line2D(node.point.x, node.point.y, newX, newY);
+
+                    for (RectBounds rect : obstacles) {
+                        if (line.intersects(rect)) {
+                            canConnect = false;
+                            break;
+                        }
+                    }
+
+                    if (canConnect) {
+                        node.parent = toAdd;
+                        node.distance = node.parent.distance + node.helper;
+                        changed = true;
+                    }
+                }
+            }
+
+            if (changed) {
+                repaintRRT();
+            }
+
+            j++;
+        }
+
+        RRTPoints.clear();
+        generatedPoint.clear();
+    }
+    public void addRRTStarforCase2a() {
+        GraphicsContext g = getGraphicsContext2D();
+        paintBackground();
+        g.setLineWidth(1.0);
+        g.setLineDashes(1);
+
+        addTarget(g);
+
+        generatedPoint = UserPanel.CoordonateAlgorithms.getGeneratedPoint();
+
+        RRTPoints.add(new Node(new Point2D(StartAndTargetNode.get(0).point.x, StartAndTargetNode.get(0).point.y)));
+
+        int j = 0;
+        while (j < 3) {
 
             //generare sample
             int x = (int) generatedPoint.get(j).point.x;
