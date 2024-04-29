@@ -6,9 +6,12 @@ import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
 
+import java.text.DecimalFormat;
 import java.util.*;
 
 public class MotionSpace extends Canvas {
+
+    private static final DecimalFormat decfor = new DecimalFormat("0.00");
 
     private int numOfConnections = 5;
 
@@ -105,49 +108,7 @@ public class MotionSpace extends Canvas {
         generatedPoint = UserPanel.CoordonateAlgorithms.getGeneratedPoint();
 
         int j = 0;
-        while (j < 5) {
-
-            boolean free = true;
-            int x = (int) generatedPoint.get(j).point.x;
-            int y = (int) generatedPoint.get(j).point.y;
-
-            for (RectBounds rect : obstacles) {
-                if (rect.contains(new Point2D(x, y))) {
-                    free = false;
-                    break;
-                }
-            }
-
-            if (free) {
-                g.setFill(Color.BLUE);
-                g.fillOval(x - b, y - b, 2 * b, 2 * b);
-                PRMPoints.add(new Point2D(x, y));
-            }
-
-            j++;
-        }
-
-        connect();
-        aStar(listAStar.get(0), listAStar.get(listAStar.size() - 1));
-        paintPRM(listAStar.get(listAStar.size() - 1));
-
-        PRMPoints.clear();
-        generatedPoint.clear();
-        listAStar.clear();
-    }
-    public void addPRMforCase2a() {
-        GraphicsContext g = getGraphicsContext2D();
-        int b = 2;
-        paintBackground();
-        g.setLineWidth(1.0);
-        g.setLineDashes(1);
-
-        addTarget(g);
-
-        generatedPoint = UserPanel.CoordonateAlgorithms.getGeneratedPoint();
-
-        int j = 0;
-        while (j < 5) {
+        while (j < generatedPoint.size()) {
 
             boolean free = true;
             int x = (int) generatedPoint.get(j).point.x;
@@ -202,8 +163,6 @@ public class MotionSpace extends Canvas {
         Map<Integer, Double> historyRoad = new HashMap<>();
         List<Double> distanceList = new ArrayList<>();
 
-//        Node intermediate = new Node(null); // for what purpose or must be deleted?
-
         // se pun punctele de start si target- dar ast dupa ce background-ul e setat
         addTarget(g);
 
@@ -212,109 +171,7 @@ public class MotionSpace extends Canvas {
         RRTPoints.add(new Node(new Point2D(StartAndTargetNode.get(0).point.x, StartAndTargetNode.get(0).point.y)));
 
         int j = 0;
-        while (j < 4) {
-            historyRoad.clear();
-            distanceList.clear();
-            //generare sample
-            int x = (int) generatedPoint.get(j).point.x;
-            int y = (int) generatedPoint.get(j).point.y;
-
-            boolean tooClose = false;
-
-            for (int i = 0; i < RRTPoints.size(); i++) {
-                Node node = RRTPoints.get(i);
-                double dist = Math.sqrt((node.point.x - x) * (node.point.x - x) + (node.point.y - y) * (node.point.y - y));
-
-                if (dist < 10.0) {
-                    tooClose = true;
-                }
-                // keep the history of all roads
-                historyRoad.put(i, dist);
-                distanceList.add(dist);
-            }
-
-            if (tooClose) {
-                continue;
-            }
-
-            historyRoad.entrySet().stream().sorted(
-                    new Comparator<Map.Entry<Integer, Double>>() {
-                        @Override
-                        public int compare(Map.Entry<Integer, Double> o1, Map.Entry<Integer, Double> o2) {
-                            return (int) (o1.getValue() - o2.getValue());
-                        }
-                    }
-            );
-
-            Collections.sort(distanceList);
-
-            boolean found = false;
-            int index = 0;
-            while (!found && index < distanceList.size()) {
-                //calculam noul punct
-                int pozClosest = positionByDistance(distanceList.get(index), historyRoad);
-                double disClosest = distanceList.get(index);
-                double delX = RRTMultiplier * ((x - RRTPoints.get(pozClosest).point.x) / disClosest);
-                double delY = RRTMultiplier * ((y - RRTPoints.get(pozClosest).point.y) / disClosest);
-
-                float newX = (float) delX + RRTPoints.get(pozClosest).point.x;
-                float newY = (float) delY + RRTPoints.get(pozClosest).point.y;
-
-                boolean collision = false;
-
-                Line2D line = new Line2D(RRTPoints.get(pozClosest).point.x, RRTPoints.get(pozClosest).point.y, newX, newY);
-                Iterator var19 = this.obstacles.iterator();
-
-                RectBounds r;
-                while (var19.hasNext()) {
-                    r = (RectBounds) var19.next();
-                    if (line.intersects(r)) {
-                        collision = true;
-                        break;
-                    }
-                }
-
-                byte d;
-                if (!collision) {
-                    d = 2;
-                    g.setFill(Color.BLUE);
-                    g.fillOval((double) (newX - (float) d), (double) (newY - (float) d), (double) (2 * d), (double) (2 * d));
-                    this.RRTPoints.add(new Node(RRTPoints.get(pozClosest), new Point2D(newX, newY)));
-                    g.setStroke(Color.BROWN);
-                    g.strokeLine((double) RRTPoints.get(pozClosest).point.x, (double) RRTPoints.get(pozClosest).point.y, (double) newX, (double) newY);
-                    j++;
-                    found = true;
-                } else {
-                    index++;
-                }
-            }
-        }
-
-        RRTPoints.clear();
-        generatedPoint.clear();
-    }
- public void addRRTforCase2a() {
-        // se creaza background = se seteaza daca e cazul obstacolele
-        GraphicsContext g = getGraphicsContext2D();
-        paintBackground();
-
-        g.setLineWidth(1.0);
-        g.setLineDashes(1);
-
-        Map<Integer, Double> historyRoad = new HashMap<>();
-        List<Double> distanceList = new ArrayList<>();
-
-//        Node intermediate = new Node(null); // for what purpose or must be deleted?
-
-        // se pun punctele de start si target- dar ast dupa ce background-ul e setat
-        addTarget(g);
-
-        generatedPoint = UserPanel.CoordonateAlgorithms.getGeneratedPoint();
-
-        RRTPoints.add(new Node(new Point2D(StartAndTargetNode.get(0).point.x, StartAndTargetNode.get(0).point.y)));
-
-        int j = 0;
-        while (j < 3) {
+        while (j < generatedPoint.size()) {
             historyRoad.clear();
             distanceList.clear();
             //generare sample
@@ -421,7 +278,7 @@ public class MotionSpace extends Canvas {
         RRTPoints.add(new Node(new Point2D(StartAndTargetNode.get(0).point.x, StartAndTargetNode.get(0).point.y)));
 
         int j = 0;
-        while (j < 4) {
+        while (j < generatedPoint.size()) {
 
             //generare sample
             int x = (int) generatedPoint.get(j).point.x;
@@ -833,8 +690,8 @@ public class MotionSpace extends Canvas {
         public List<Edge> neighbors;
 
         // Evaluation functions
-        public double f = Double.MAX_VALUE;
-        public double g = Double.MAX_VALUE;
+        public double f = 1000;
+        public double g = 1000;
         // Hardcoded heuristic
         public double h;
 
@@ -884,6 +741,7 @@ public class MotionSpace extends Canvas {
 
             for (NodeAStar.Edge edge : n.neighbors) {
                 NodeAStar m = edge.node;
+
                 double totalWeight = n.g + edge.weight;
 
                 if (!openList.contains(m) && !closedList.contains(m)) {
