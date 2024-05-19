@@ -18,8 +18,6 @@ public class Main extends Application {
         border.setStyle("-fx-background-color: #000000;");
         border.setPadding(new Insets(bSize));
         MotionSpace space = new MotionSpace(size);
-//        space.setScaleX(5);
-//        space.setScaleY(5);
         border.getChildren().add(space);
 
         UserPanel panel = new UserPanel(space);
