@@ -11,7 +11,7 @@ import java.util.*;
 
 public class MotionSpace extends Canvas {
 
-    private static final DecimalFormat decfor = new DecimalFormat("0.00");
+//    private static final DecimalFormat decfor = new DecimalFormat("0.00");
 
     private int numOfConnections = 10;
 
@@ -356,7 +356,7 @@ public class MotionSpace extends Canvas {
 
             boolean changed = false;
             for (Node node : closeNodes) {
-                // TODO: 04/05/2024 add variable replaceing or subtitute cost 
+                // TODO: 04/05/2024 add variable replacing or subtitute cost
                 if (node.helper + toAdd.distance < node.distance) {
                     //2'nd verification for intersection
                     Line2D line = new Line2D(node.point.x, node.point.y, newX, newY);
