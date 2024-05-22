@@ -254,13 +254,23 @@ public class UserPanel extends VBox {
             }
         });
 
+        Button randomRRT = new Button("Random RRT");
+        randomRRT.setOnMouseClicked(event -> {
+            setDefaultValueForObstacles();
+            CoordonateAlgorithms.setStartAndTargetNode(StartAndTargetNode);
+            space.createObstacles();
+            //if(strategy == Strategy.PRM) space.addPRM();
+             if(strategy == Strategy.RRT) space.addRRTRandom();
+            //else if(strategy == Strategy.RRTstar) space.addRRTStar(1);
+        });
+
         textFieldErrorMessage = new TextField();
         textFieldErrorMessage.setMaxWidth(500);
         textFieldErrorMessage.setMaxHeight(100);
         textFieldErrorMessage.setAlignment(Pos.CENTER);
         textFieldErrorMessage.setEditable(false);
 
-        addition.getChildren().addAll(addOne, addTwo, addThree, addFour);
+        addition.getChildren().addAll(addOne, addTwo, addThree, addFour, randomRRT);
         addition.setSpacing(5);
 
         Button clear = new Button("Clear Space");

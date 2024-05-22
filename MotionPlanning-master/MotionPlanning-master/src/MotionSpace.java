@@ -17,6 +17,8 @@ public class MotionSpace extends Canvas {
 
     private int optimiseDistance = 1000;
 
+    private int RRTMultiplier = 8;
+
     List<Node> RRTPoints = new ArrayList<>();
 
     List<Node> generatedPoint = new ArrayList<>();
@@ -243,6 +245,99 @@ public class MotionSpace extends Canvas {
         System.out.println("RRT " + result);
         return result;
     }
+
+    public void addRRTRandom() {
+        Random rand = new Random();
+        GraphicsContext g = getGraphicsContext2D();
+
+        RRTPoints.add(StartAndTargetNode.get(0));
+        int n = 10;
+        for (int j = 0; j < n; j++) {
+
+            int x = rand.nextInt((int) getWidth());
+            int y = rand.nextInt((int) getHeight());
+
+            double closestDistance = 99999;
+            Node closestNode = null;
+
+            boolean tooClose = false;
+
+            for (Node node : RRTPoints) {
+
+                double dist = Math.sqrt((node.point.x - x) * (node.point.x - x) + (node.point.y - y) * (node.point.y - y));
+
+                if (dist < 10) {
+                    tooClose = true;
+                }
+
+                if (dist < closestDistance) {
+                    closestDistance = dist;
+                    closestNode = node;
+                }
+            }
+
+            if (tooClose || closestNode == null) {
+                continue;
+            }
+
+            double delX = RRTMultiplier * ((x - closestNode.point.x) / closestDistance);
+            double delY = RRTMultiplier * ((y - closestNode.point.y) / closestDistance);
+
+            float newX = (float) delX + closestNode.point.x;//norma euclidiana = x/ distanta euclidiana
+            float newY = (float) delY + closestNode.point.y;
+
+            boolean collision = false;
+
+            Line2D line = new Line2D(closestNode.point.x, closestNode.point.y, newX, newY);
+            for (RectBounds r : obstacles) {
+                if (line.intersects(r)) {
+                    collision = true;
+                    break;
+                }
+            }
+
+            if (collision) {
+                collision = false;
+
+                newX = (float) delX / 2 + closestNode.point.x;
+                newY = (float) delY / 2 + closestNode.point.y;
+                line = new Line2D(closestNode.point.x, closestNode.point.y, newX, newY);
+
+                for (RectBounds r : obstacles) {
+                    if (line.intersects(r)) {
+                        collision = true;
+                        break;
+                    }
+                }
+
+                // daca nu se intersecteaza cu obstacolul
+                if (!collision) {
+
+                    int d = 2;
+
+                    g.setFill(Color.BLUE);
+                    g.fillOval(newX - d, newY - d, 2 * d, 2 * d);
+
+                    RRTPoints.add(new Node(closestNode, new Point2D(newX, newY)));
+                    g.setStroke(Color.BLACK);
+                    g.strokeLine(closestNode.point.x, closestNode.point.y, newX, newY);
+
+                }
+            }
+            // daca din prima nu avem intersectie cu obstacolele
+            else {
+                int d = 2;
+
+                g.setFill(Color.BLUE);
+                g.fillOval(newX - d, newY - d, 2 * d, 2 * d);
+
+                RRTPoints.add(new Node(closestNode, new Point2D(newX, newY)));
+                g.setStroke(Color.BLACK);
+                g.strokeLine(closestNode.point.x, closestNode.point.y, newX, newY);
+            }
+        }
+    }
+
 
     public long addRRTStar(List<String> listConnectedPoints) {
         GraphicsContext g = getGraphicsContext2D();
