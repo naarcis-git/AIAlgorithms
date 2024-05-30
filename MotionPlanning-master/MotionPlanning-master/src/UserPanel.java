@@ -2,12 +2,12 @@ import com.sun.javafx.geom.Point2D;
 import javafx.event.Event;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
-import javafx.scene.control.Button;
-import javafx.scene.control.ComboBox;
-import javafx.scene.control.Label;
-import javafx.scene.control.TextField;
+import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
+import javafx.scene.text.Font;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -15,10 +15,14 @@ import java.util.stream.Stream;
 
 public class UserPanel extends VBox {
 
+    int x, y;
+
     List<Node> StartAndTargetNode = new ArrayList<>();
     Map<String, Integer> distanceNodes = new HashMap<>();
     Map<String, Point2D> distanceCoordinateNodes = new HashMap<>();
     List<String> listConnectedPoints = new ArrayList<>();
+
+    List<Node> randomPoints = new ArrayList<>();
 
     private ComboBox strategyBox;
     private ComboBox obstacleSet;
@@ -254,14 +258,40 @@ public class UserPanel extends VBox {
             }
         });
 
-        Button randomRRT = new Button("Random RRT");
+        Button randomRRT = new Button("Random");
         randomRRT.setOnMouseClicked(event -> {
             setDefaultValueForObstacles();
             CoordonateAlgorithms.setStartAndTargetNode(StartAndTargetNode);
             space.createObstacles();
-            //if(strategy == Strategy.PRM) space.addPRM();
-             if(strategy == Strategy.RRT) space.addRRTRandom();
-            //else if(strategy == Strategy.RRTstar) space.addRRTStar(1);
+            if (strategy == Strategy.PRM) {
+                space.addPRMRandom(listConnectedPoints, randomPoints);
+                //timeValue = space.addPRMRandom();
+                //textFieldTime.setText(String.valueOf(timeValue));
+                measurement(randomPoints);
+                distanceNodes.keySet().removeIf(e -> !listConnectedPoints.contains(e));
+                distanceCoordinateNodes.keySet().removeIf(e -> !listConnectedPoints.contains(e));
+
+                drawDistancePoints();
+
+                randomPoints.clear();
+            }
+            if (strategy == Strategy.RRT) {
+                space.addRRTRandom(listConnectedPoints, randomPoints);
+
+                measurement(randomPoints);
+                distanceNodes.keySet().removeIf(e -> !listConnectedPoints.contains(e));
+                distanceCoordinateNodes.keySet().removeIf(e -> !listConnectedPoints.contains(e));
+
+                drawDistancePoints();
+                // setare initiala//letter pentru noduri
+                for (int i = 0; i < randomPoints.size(); i++) {
+                    space.setMarkers(randomPoints.get(i).point.x, randomPoints.get(i).point.y, i);
+                }
+                randomPoints.clear();
+            } else if (strategy == Strategy.RRTstar) {
+                space.addRRTStarRandom();
+                drawDistancePoints();
+            }
         });
 
         textFieldErrorMessage = new TextField();
@@ -294,7 +324,27 @@ public class UserPanel extends VBox {
         textFieldTime.setMaxHeight(100);
         textFieldTime.setAlignment(Pos.CENTER);
         textFieldTime.setEditable(false);
-        this.getChildren().addAll(addition, clear, strategyBox, obstacleSet, textFieldErrorMessage, labelTime, textFieldTime);
+
+        HBox slider = new HBox();
+
+        Label label = new Label("RRT Random Increment:  ");
+
+        Slider multiplierSlider = new Slider();
+        multiplierSlider.setMin(0);
+        multiplierSlider.setMax(100);
+        multiplierSlider.setValue(10);
+        multiplierSlider.setShowTickLabels(true);
+        multiplierSlider.setShowTickMarks(true);
+        multiplierSlider.setMajorTickUnit(2);
+        multiplierSlider.setMinorTickCount(1);
+        multiplierSlider.setBlockIncrement(10);
+        multiplierSlider.valueProperty().addListener((observable, oldValue, newValue) -> {
+            space.setRRTMultiplier(newValue.intValue());
+        });
+        multiplierSlider.setPrefWidth(300);
+        slider.getChildren().addAll(label, multiplierSlider);
+
+        this.getChildren().addAll(addition, clear, strategyBox, obstacleSet, textFieldErrorMessage, labelTime, textFieldTime, slider);
 
         this.setSpacing(5);
         this.setPadding(new Insets(10));
@@ -547,5 +597,15 @@ public class UserPanel extends VBox {
 
         return ok;
     }
+
+    public void paint(GraphicsContext g) {
+        g.setFont(new Font("Monospaced", 20));
+        g.setFill(Color.RED);
+        g.fillOval(x, y, 10, 10);
+//        g.(x + "," + y, x + 10, y - 10);
+//        g.drawString(str, x + 10, y + 20);
+//        showStatus(str + " at " + x + "," + y);
+    }
+
 }
 
