@@ -8,7 +8,6 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
 
-import java.text.DecimalFormat;
 import java.util.*;
 
 public class MotionSpace extends Canvas {
@@ -334,7 +333,8 @@ public class MotionSpace extends Canvas {
         g.setFill(Color.GOLD);
         g.fillOval(StartAndTargetNode.get(1).point.x - d, StartAndTargetNode.get(1).point.y - d, 2 * d, 2 * d);
 
-        for (int j = 0; j < n; j++) {
+        int j=0;
+        while (j < n){
 
             if (j != 0) {
                 x = randomInRange(27, (int) getWidth() - 27);
@@ -371,6 +371,10 @@ public class MotionSpace extends Canvas {
             }
 
             if (tooClose || closestNode == null) {
+                if (j==0)
+                {
+                    j = j+1;
+                }
                 continue;
             }
 
@@ -417,21 +421,24 @@ public class MotionSpace extends Canvas {
                     g.setFill(Color.BLACK);
                     g.fillOval(newX - d, newY - d, 2 * d, 2 * d);
 
-                    RRTPoints.add(new Node(closestNode, new Point2D(newX, newY)));
-                    randomPoints.add(new Node(null, new Point2D(newX, newY)));
+                    Node currentNode = new Node(closestNode, new Point2D(newX, newY));
+                    RRTPoints.add(currentNode);
+                    randomPoints.add(currentNode);
                     g.setStroke(Color.BLACK);
                     g.strokeLine(closestNode.point.x, closestNode.point.y, newX, newY);
                     listConnectedPoints.add("" + (char) ((int) 'A' + positionForClosestPoint(RRTPoints, closestNode)) + (char) ((int) 'A' + j));
-                }
 
-                //calcul si setari pentru punct final
-                if (isGoal(new Node(StartAndTargetNode.get(1), new Point2D(newX, newY)))) {
-                    Node finalBound = new Node(StartAndTargetNode.get(1), new Point2D(newX, newY));
-                    RRTPoints.add(finalBound);
-                    randomPoints.add(new Node(null, new Point2D(StartAndTargetNode.get(1).point.x, StartAndTargetNode.get(1).point.y)));
-                    g.setStroke(Color.BLACK);
-                    g.strokeLine(StartAndTargetNode.get(1).point.x, StartAndTargetNode.get(1).point.y, newX, newY);
-                    listConnectedPoints.add("" + (char) ((int) 'A' + positionForClosestPoint(RRTPoints, finalBound)) + (char) ((int) 'A' + j + 1));
+
+                    //calcul si setari pentru punct final
+                    if (isGoal(new Node(StartAndTargetNode.get(1), new Point2D(newX, newY))) && randomPoints.stream().noneMatch(e -> e.point == StartAndTargetNode.get(1).point)) {
+                        Node finalBound = new Node(currentNode, new Point2D(StartAndTargetNode.get(1).point.x, StartAndTargetNode.get(1).point.y));
+                        RRTPoints.add(finalBound);
+                        randomPoints.add(StartAndTargetNode.get(1));
+                        g.setStroke(Color.BLACK);
+                        g.strokeLine(StartAndTargetNode.get(1).point.x, StartAndTargetNode.get(1).point.y, newX, newY);
+                        listConnectedPoints.add("" + (char) ((int) 'A' + j) + (char) ((int) 'A' + positionForClosestPoint(RRTPoints, finalBound)));
+                        break;
+                    }
                 }
 
             }
@@ -440,25 +447,29 @@ public class MotionSpace extends Canvas {
                 g.setFill(Color.BLACK);
                 g.fillOval(newX - d, newY - d, 2 * d, 2 * d);
 
-                RRTPoints.add(new Node(closestNode, new Point2D(newX, newY)));
-                randomPoints.add(new Node(null, new Point2D(newX, newY)));
+                Node currentNode = new Node(closestNode, new Point2D(newX, newY));
+                RRTPoints.add(currentNode);
+                randomPoints.add(currentNode);
                 g.setStroke(Color.BLACK);
                 g.strokeLine(closestNode.point.x, closestNode.point.y, newX, newY);
                 listConnectedPoints.add("" + (char) ((int) 'A' + positionForClosestPoint(RRTPoints, closestNode)) + (char) ((int) 'A' + j));
 
-                if (isGoal(new Node(StartAndTargetNode.get(1), new Point2D(newX, newY)))) {
-                    Node finalBound = new Node(StartAndTargetNode.get(1), new Point2D(newX, newY));
+                if (isGoal(new Node(StartAndTargetNode.get(1), new Point2D(newX, newY))) && randomPoints.stream().noneMatch(e -> e.point == StartAndTargetNode.get(1).point)) {
+                    Node finalBound = new Node(currentNode, new Point2D(StartAndTargetNode.get(1).point.x, StartAndTargetNode.get(1).point.y));
                     RRTPoints.add(finalBound);
-                    randomPoints.add(new Node(null, new Point2D(StartAndTargetNode.get(1).point.x, StartAndTargetNode.get(1).point.y)));
+                    randomPoints.add(StartAndTargetNode.get(1));
                     g.setStroke(Color.BLACK);
                     g.strokeLine(StartAndTargetNode.get(1).point.x, StartAndTargetNode.get(1).point.y, newX, newY);
-                    listConnectedPoints.add("" + (char) ((int) 'A' + positionForClosestPoint(RRTPoints, finalBound)) + (char) ((int) 'A' + j + 1));
+                    listConnectedPoints.add("" + (char) ((int) 'A' + j) + (char) ((int) 'A' + positionForClosestPoint(RRTPoints, finalBound)));
+                    break;
                 }
             }
+            j = j+1;
         }
 
-        if (randomPoints.stream().filter( e -> e.point == StartAndTargetNode.get(1).point).count() == 0){
-            randomPoints.add(new Node(null, new Point2D(StartAndTargetNode.get(1).point.x, StartAndTargetNode.get(1).point.y)));
+        // caz in care nu avem legatura cu punctul final
+        if (randomPoints.stream().noneMatch(e -> e.point == StartAndTargetNode.get(1).point)) {
+            randomPoints.add(StartAndTargetNode.get(1));
         }
 
         RRTPoints.clear();
@@ -1224,7 +1235,7 @@ public class MotionSpace extends Canvas {
             double dist = Math.sqrt((node.point.x - StartAndTargetNode.get(1).point.x) * (node.point.x - StartAndTargetNode.get(1).point.x)
                     + (node.point.y - StartAndTargetNode.get(1).point.y) * (node.point.y - StartAndTargetNode.get(1).point.y));
 
-            return dist < 100;
+            return dist < 150;
         }
 
         return false;
