@@ -52,9 +52,6 @@ public class UserPanel extends VBox {
 
     private void setup() {
 
-        StartAndTargetNode.add(new Node(null, new Point2D(240, 260)));
-        StartAndTargetNode.add(new Node(null, new Point2D(370, 450)));
-
         obstacleSet = new ComboBox();
         obstacleSet.setPromptText("Obstacle Set");
         obstacleSet.setOnAction(this::updateObstacles);
@@ -65,10 +62,12 @@ public class UserPanel extends VBox {
                 "Set 4",
                 "No Obstacles"
         );
-
+        // TODO: 01/06/2024 ADD number CRITERIA for algorithms , like n!!
         HBox addition = new HBox();
         Button addOne = new Button("Case 1");
         addOne.setOnMouseClicked(event -> {
+            StartAndTargetNode.add(new Node(null, new Point2D(240, 260)));
+            StartAndTargetNode.add(new Node(null, new Point2D(370, 450)));
             if (!handleExceptionCase())
                 return;
             setDefaultValueForObstacles();
@@ -95,7 +94,6 @@ public class UserPanel extends VBox {
                 CoordonateAlgorithms.setGeneratedPoint(generateRRTInput());
                 timeValue = space.addRRT(listConnectedPoints);
                 textFieldTime.setText(String.valueOf(timeValue));
-                textFieldTime.setText(String.valueOf(timeValue));
 
                 distanceNodes.keySet().removeIf(e -> !listConnectedPoints.contains(e));
                 distanceCoordinateNodes.keySet().removeIf(e -> !listConnectedPoints.contains(e));
@@ -107,6 +105,7 @@ public class UserPanel extends VBox {
                 CoordonateAlgorithms.setGeneratedPoint(generateRRTInput());
                 timeValue = space.addRRTStar(listConnectedPoints);
                 textFieldTime.setText(String.valueOf(timeValue));
+
                 distanceNodes.keySet().removeIf(e -> !listConnectedPoints.contains(e));
                 distanceCoordinateNodes.keySet().removeIf(e -> !listConnectedPoints.contains(e));
                 drawDistancePoints();
@@ -115,6 +114,8 @@ public class UserPanel extends VBox {
 
         Button addTwo = new Button("Case 2");
         addTwo.setOnMouseClicked(event -> {
+            StartAndTargetNode.add(new Node(null, new Point2D(240, 260)));
+            StartAndTargetNode.add(new Node(null, new Point2D(370, 450)));
             if (!handleExceptionCase())
                 return;
 
@@ -127,6 +128,7 @@ public class UserPanel extends VBox {
                 CoordonateAlgorithms.setGeneratedPoint(generatePrmInputForCase2());
                 timeValue = space.addPRM(listConnectedPoints);
                 textFieldTime.setText(String.valueOf(timeValue));
+
                 listConnectedPoints.forEach(e -> {
                     if (distanceNodes.keySet().contains(e)) distanceNodes.remove(e);
                 });
@@ -162,6 +164,8 @@ public class UserPanel extends VBox {
 
         Button addThree = new Button("Case 3");
         addThree.setOnMouseClicked(event -> {
+            StartAndTargetNode.add(new Node(null, new Point2D(240, 260)));
+            StartAndTargetNode.add(new Node(null, new Point2D(370, 450)));
             if (!handleExceptionCase())
                 return;
 
@@ -189,6 +193,7 @@ public class UserPanel extends VBox {
                 CoordonateAlgorithms.setGeneratedPoint(generateRRTInputForCase3());
                 timeValue = space.addRRT(listConnectedPoints);
                 textFieldTime.setText(String.valueOf(timeValue));
+
                 distanceNodes.keySet().removeIf(e -> !listConnectedPoints.contains(e));
                 distanceCoordinateNodes.keySet().removeIf(e -> !listConnectedPoints.contains(e));
 
@@ -199,6 +204,7 @@ public class UserPanel extends VBox {
                 CoordonateAlgorithms.setGeneratedPoint(generateRRTInputForCase3());
                 timeValue = space.addRRTStar(listConnectedPoints);
                 textFieldTime.setText(String.valueOf(timeValue));
+
                 distanceNodes.keySet().removeIf(e -> !listConnectedPoints.contains(e));
                 distanceCoordinateNodes.keySet().removeIf(e -> !listConnectedPoints.contains(e));
 
@@ -209,7 +215,8 @@ public class UserPanel extends VBox {
 
         Button addFour = new Button("Case 4");
         addFour.setOnMouseClicked(event -> {
-
+            StartAndTargetNode.add(new Node(null, new Point2D(240, 260)));
+            StartAndTargetNode.add(new Node(null, new Point2D(370, 450)));
             if (!handleExceptionCase4())
                 return;
 
@@ -226,6 +233,7 @@ public class UserPanel extends VBox {
                 CoordonateAlgorithms.setGeneratedPoint(generatePrmInputForCase4());
                 timeValue = space.addPRM(listConnectedPoints);
                 textFieldTime.setText(String.valueOf(timeValue));
+
                 listConnectedPoints.forEach(e -> {
                     if (distanceNodes.keySet().contains(e)) distanceNodes.remove(e);
                 });
@@ -251,6 +259,7 @@ public class UserPanel extends VBox {
                 CoordonateAlgorithms.setGeneratedPoint(generateRRTInputForCase4());
                 timeValue = space.addRRTStar(listConnectedPoints);
                 textFieldTime.setText(String.valueOf(timeValue));
+
                 distanceNodes.keySet().removeIf(e -> !listConnectedPoints.contains(e));
                 distanceCoordinateNodes.keySet().removeIf(e -> !listConnectedPoints.contains(e));
 
@@ -264,33 +273,36 @@ public class UserPanel extends VBox {
             CoordonateAlgorithms.setStartAndTargetNode(StartAndTargetNode);
             space.createObstacles();
             if (strategy == Strategy.PRM) {
-                space.addPRMRandom(listConnectedPoints, randomPoints);
-                //timeValue = space.addPRMRandom();
-                //textFieldTime.setText(String.valueOf(timeValue));
+                timeValue = space.addPRMRandom(listConnectedPoints, randomPoints);
+                textFieldTime.setText(String.valueOf(timeValue));
+
                 measurement(randomPoints);
                 distanceNodes.keySet().removeIf(e -> !listConnectedPoints.contains(e));
                 distanceCoordinateNodes.keySet().removeIf(e -> !listConnectedPoints.contains(e));
 
                 drawDistancePoints();
-
                 randomPoints.clear();
             }
             if (strategy == Strategy.RRT) {
-                space.addRRTRandom(listConnectedPoints, randomPoints);
+                timeValue = space.addRRTRandom(listConnectedPoints, randomPoints);
+                textFieldTime.setText(String.valueOf(timeValue));
 
                 measurement(randomPoints);
                 distanceNodes.keySet().removeIf(e -> !listConnectedPoints.contains(e));
                 distanceCoordinateNodes.keySet().removeIf(e -> !listConnectedPoints.contains(e));
 
                 drawDistancePoints();
-                // setare initiala//letter pentru noduri
-                for (int i = 0; i < randomPoints.size(); i++) {
-                    space.setMarkers(randomPoints.get(i).point.x, randomPoints.get(i).point.y, i);
-                }
                 randomPoints.clear();
             } else if (strategy == Strategy.RRTstar) {
-                space.addRRTStarRandom();
+                timeValue = space.addRRTStarRandom(listConnectedPoints, randomPoints);
+                textFieldTime.setText(String.valueOf(timeValue));
+
+                measurement(randomPoints);
+                distanceNodes.keySet().removeIf(e -> !listConnectedPoints.contains(e));
+                distanceCoordinateNodes.keySet().removeIf(e -> !listConnectedPoints.contains(e));
+
                 drawDistancePoints();
+                randomPoints.clear();
             }
         });
 
@@ -598,14 +610,14 @@ public class UserPanel extends VBox {
         return ok;
     }
 
-    public void paint(GraphicsContext g) {
-        g.setFont(new Font("Monospaced", 20));
-        g.setFill(Color.RED);
-        g.fillOval(x, y, 10, 10);
-//        g.(x + "," + y, x + 10, y - 10);
-//        g.drawString(str, x + 10, y + 20);
-//        showStatus(str + " at " + x + "," + y);
-    }
+//    public void paint(GraphicsContext g) {
+//        g.setFont(new Font("Monospaced", 20));
+//        g.setFill(Color.RED);
+//        g.fillOval(x, y, 10, 10);
+////        g.(x + "," + y, x + 10, y - 10);
+////        g.drawString(str, x + 10, y + 20);
+////        showStatus(str + " at " + x + "," + y);
+//    }
 
 }
 

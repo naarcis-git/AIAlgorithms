@@ -33,6 +33,7 @@ public class MotionSpace extends Canvas {
     List<NodeAStar> listAStar = new ArrayList<>();
 
     private int size;
+    // TODO: 01/06/2024 ADD number CRITERIA for algorithms , like n!!
 
     public MotionSpace(int size) {
         super(size + 250, 390);
@@ -40,6 +41,8 @@ public class MotionSpace extends Canvas {
 
         // Add mouse click listener
         setOnMouseClicked(new EventHandler<MouseEvent>() {
+            // TODO: 01/06/2024 ADD number CRITERIA for algorithms , like n!!
+
             @Override
             public void handle(MouseEvent mouseEvent) {
                 // Get click coordinates relative to the canvas
@@ -155,19 +158,24 @@ public class MotionSpace extends Canvas {
         PRMPoints.clear();
         generatedPoint.clear();
         listAStar.clear();
+        StartAndTargetNode.clear();
 
         long result = (end - start) / 1000;
         System.out.println("PRM " + result);
+
         return result;
     }
 
-    public void addPRMRandom(List<String> listConnectedPoints, List<Node> randomPoints) {
+    public long addPRMRandom(List<String> listConnectedPoints, List<Node> randomPoints) {
         GraphicsContext g = getGraphicsContext2D();
-        int n = 5;
+        g.setLineWidth(1.0);
+        g.setLineDashes(1);
+
+        int n = 7;
         int b = 6;
 
-        //generateStartAndTarget();
-        paintBackground();
+        long start = System.nanoTime();
+        long end;
 
         for (int i = 0; i < n; i++) {
             boolean free = false;
@@ -192,24 +200,32 @@ public class MotionSpace extends Canvas {
                 }
             }
 
-            g.setFill(Color.BLUE);
+            g.setFill(Color.BLACK);
             g.fillOval(x - b, y - b, 2 * b, 2 * b);
             PRMPoints.add(new Point2D(x, y));
             randomPoints.add(new Node(null, new Point2D(x, y)));
         }
 
-        // colorare puncte start si target
-        drawStartAndTargetPoints(6);
-
         connectForPRM(listConnectedPoints, randomPoints);
+        aStar(listAStar.get(0), listAStar.get(listAStar.size() - 1));
+        paintShortestRoadPRM(listAStar.get(listAStar.size() - 1));
 
         // setare initiala//letter pentru noduri
         for (int i = 0; i < PRMPoints.size(); i++) {
             setMarkers(PRMPoints.get(i).x, PRMPoints.get(i).y, i);
         }
 
+        // colorare puncte start si target
+        drawStartAndTargetPoints(6);
+
         PRMPoints.clear();
+        listAStar.clear();
         StartAndTargetNode.clear();
+        end = System.nanoTime();
+
+        long result = (end - start) / 1000;
+        System.out.println("RRT STAR " + result);
+        return result;
     }
 
 
@@ -311,15 +327,21 @@ public class MotionSpace extends Canvas {
 
         RRTPoints.clear();
         generatedPoint.clear();
+        StartAndTargetNode.clear();
 
         long result = (end - start) / 1000;
         System.out.println("RRT " + result);
+
         return result;
     }
 
-    public void addRRTRandom(List<String> listConnectedPoints, List<Node> randomPoints) {
+    public long addRRTRandom(List<String> listConnectedPoints, List<Node> randomPoints) {
         GraphicsContext g = getGraphicsContext2D();
-        generateStartAndTarget();
+        g.setLineWidth(1.0);
+        g.setLineDashes(1);
+
+        long start = System.nanoTime();
+        long end;
 
         RRTPoints.add(StartAndTargetNode.get(0));
         randomPoints.add(new Node(null, new Point2D(StartAndTargetNode.get(0).point.x, StartAndTargetNode.get(0).point.y)));
@@ -333,8 +355,8 @@ public class MotionSpace extends Canvas {
         g.setFill(Color.GOLD);
         g.fillOval(StartAndTargetNode.get(1).point.x - d, StartAndTargetNode.get(1).point.y - d, 2 * d, 2 * d);
 
-        int j=0;
-        while (j < n){
+        int j = 0;
+        while (j < n) {
 
             if (j != 0) {
                 x = randomInRange(27, (int) getWidth() - 27);
@@ -352,7 +374,7 @@ public class MotionSpace extends Canvas {
 
             // case for start -> draw the start point
             if (j == 0) {
-                g.setFill(Color.HOTPINK);
+                g.setFill(Color.RED);
                 g.fillOval(x - d, y - d, 2 * d, 2 * d);
             }
 
@@ -371,9 +393,8 @@ public class MotionSpace extends Canvas {
             }
 
             if (tooClose || closestNode == null) {
-                if (j==0)
-                {
-                    j = j+1;
+                if (j == 0) {
+                    j = j + 1;
                 }
                 continue;
             }
@@ -424,7 +445,8 @@ public class MotionSpace extends Canvas {
                     Node currentNode = new Node(closestNode, new Point2D(newX, newY));
                     RRTPoints.add(currentNode);
                     randomPoints.add(currentNode);
-                    g.setStroke(Color.BLACK);
+                    g.setStroke(Color.ROYALBLUE);
+                    g.setLineWidth(6);
                     g.strokeLine(closestNode.point.x, closestNode.point.y, newX, newY);
                     listConnectedPoints.add("" + (char) ((int) 'A' + positionForClosestPoint(RRTPoints, closestNode)) + (char) ((int) 'A' + j));
 
@@ -434,11 +456,14 @@ public class MotionSpace extends Canvas {
                         Node finalBound = new Node(currentNode, new Point2D(StartAndTargetNode.get(1).point.x, StartAndTargetNode.get(1).point.y));
                         RRTPoints.add(finalBound);
                         randomPoints.add(StartAndTargetNode.get(1));
-                        g.setStroke(Color.BLACK);
+                        g.setStroke(Color.ROYALBLUE);
+                        g.setLineWidth(6);
                         g.strokeLine(StartAndTargetNode.get(1).point.x, StartAndTargetNode.get(1).point.y, newX, newY);
                         listConnectedPoints.add("" + (char) ((int) 'A' + j) + (char) ((int) 'A' + positionForClosestPoint(RRTPoints, finalBound)));
                         break;
                     }
+                } else {
+                    continue;
                 }
 
             }
@@ -450,7 +475,8 @@ public class MotionSpace extends Canvas {
                 Node currentNode = new Node(closestNode, new Point2D(newX, newY));
                 RRTPoints.add(currentNode);
                 randomPoints.add(currentNode);
-                g.setStroke(Color.BLACK);
+                g.setStroke(Color.ROYALBLUE);
+                g.setLineWidth(6);
                 g.strokeLine(closestNode.point.x, closestNode.point.y, newX, newY);
                 listConnectedPoints.add("" + (char) ((int) 'A' + positionForClosestPoint(RRTPoints, closestNode)) + (char) ((int) 'A' + j));
 
@@ -458,21 +484,41 @@ public class MotionSpace extends Canvas {
                     Node finalBound = new Node(currentNode, new Point2D(StartAndTargetNode.get(1).point.x, StartAndTargetNode.get(1).point.y));
                     RRTPoints.add(finalBound);
                     randomPoints.add(StartAndTargetNode.get(1));
-                    g.setStroke(Color.BLACK);
+                    g.setStroke(Color.ROYALBLUE);
+                    g.setLineWidth(6);
                     g.strokeLine(StartAndTargetNode.get(1).point.x, StartAndTargetNode.get(1).point.y, newX, newY);
                     listConnectedPoints.add("" + (char) ((int) 'A' + j) + (char) ((int) 'A' + positionForClosestPoint(RRTPoints, finalBound)));
                     break;
                 }
             }
-            j = j+1;
+            j = j + 1;
         }
 
         // caz in care nu avem legatura cu punctul final
         if (randomPoints.stream().noneMatch(e -> e.point == StartAndTargetNode.get(1).point)) {
+            RRTPoints.add(new Node(null, StartAndTargetNode.get(1).point));
             randomPoints.add(StartAndTargetNode.get(1));
         }
 
+        // setare initiala//letter pentru noduri
+        for (int i = 0; i < randomPoints.size(); i++) {
+            setMarkers(randomPoints.get(i).point.x, randomPoints.get(i).point.y, i);
+        }
+
+        paintShortestRoadRRT(RRTPoints.get(RRTPoints.size() - 1));
+
+        // colorare puncte start si target
+        drawStartAndTargetPoints(6);
+
+        end = System.nanoTime();
+
         RRTPoints.clear();
+        StartAndTargetNode.clear();
+
+        long result = (end - start) / 1000;
+        System.out.println("RRT STAR " + result);
+
+        return result;
     }
 
 
@@ -624,19 +670,26 @@ public class MotionSpace extends Canvas {
 
         RRTPoints.clear();
         generatedPoint.clear();
+        StartAndTargetNode.clear();
 
         long result = (end - start) / 1000;
         System.out.println("RRT STAR " + result);
+
         return result;
     }
 
 
-    public void addRRTStarRandom() {
-        int n = 40;
+    public long addRRTStarRandom(List<String> listConnectedPoints, List<Node> randomPoints) {
+        int n = 10;
         GraphicsContext g = getGraphicsContext2D();
-        generateStartAndTarget();
+        g.setLineWidth(1.0);
+        g.setLineDashes(1);
+
+        long start = System.nanoTime();
+        long end;
 
         RRTPoints.add(StartAndTargetNode.get(0));
+        randomPoints.add(StartAndTargetNode.get(0));
         int d = 6;
 
         // draw the target point
@@ -644,7 +697,8 @@ public class MotionSpace extends Canvas {
         g.fillOval(StartAndTargetNode.get(1).point.x - d, StartAndTargetNode.get(1).point.y - d, 2 * d, 2 * d);
         int x;
         int y;
-        for (int j = 0; j < n; j++) {
+        int j = 0;
+        while (j < n) {
 
             if (j != 0) {
                 x = randomInRange(27, (int) getWidth() - 27);
@@ -656,7 +710,7 @@ public class MotionSpace extends Canvas {
 
             // case for start -> draw the start point
             if (j == 0) {
-                g.setFill(Color.HOTPINK);
+                g.setFill(Color.RED);
                 g.fillOval(x - d, y - d, 2 * d, 2 * d);
             }
 
@@ -682,6 +736,8 @@ public class MotionSpace extends Canvas {
             }
 
             if (tooClose || closestNode == null) {
+                if (j == 0)
+                    j++;
                 continue;
             }
 
@@ -737,18 +793,27 @@ public class MotionSpace extends Canvas {
             g.setFill(Color.BLACK);
             g.fillOval(newX - d, newY - d, 2 * d, 2 * d);
 
-            if (isGoal(new Node(StartAndTargetNode.get(1), new Point2D(newX, newY)))) {
-                g.setStroke(Color.BLACK);
-                RRTPoints.add(new Node(
-                        new Node(closestNode, new Point2D(newX, newY)),
-                        new Point2D(StartAndTargetNode.get(1).point.x, StartAndTargetNode.get(1).point.y)));
-                g.strokeLine(StartAndTargetNode.get(1).point.x, StartAndTargetNode.get(1).point.y, newX, newY);
-            }
-
             Node toAdd = new Node(closestNode, new Point2D(newX, newY));
             RRTPoints.add(toAdd);
-            g.setStroke(Color.BLACK);
+            randomPoints.add(toAdd);
+            g.setStroke(Color.ROYALBLUE);
+            g.setLineWidth(6);
             g.strokeLine(closestNode.point.x, closestNode.point.y, newX, newY);
+            listConnectedPoints.add("" + (char) ((int) 'A' + positionForClosestPoint(RRTPoints, closestNode)) + (char) ((int) 'A' + j));
+
+            if (isGoal(new Node(StartAndTargetNode.get(1), new Point2D(newX, newY)))) {
+                g.setStroke(Color.ROYALBLUE);
+                Node finalBound = new Node(
+                        toAdd,
+                        new Point2D(StartAndTargetNode.get(1).point.x, StartAndTargetNode.get(1).point.y));
+                RRTPoints.add(finalBound);
+                g.setLineWidth(6);
+
+                g.strokeLine(StartAndTargetNode.get(1).point.x, StartAndTargetNode.get(1).point.y, newX, newY);
+                randomPoints.add(finalBound);
+                listConnectedPoints.add("" + (char) ((int) 'A' + j) + (char) ((int) 'A' + positionForClosestPoint(RRTPoints, finalBound)));
+                break;
+            }
 
             boolean changed = false;
             for (Node node : closeNodes) {
@@ -775,18 +840,42 @@ public class MotionSpace extends Canvas {
             }
 
             if (changed) {
-                repaintRRT();
+                repaintRRT(randomPoints, listConnectedPoints);
             }
-
+            j++;
         }
+
+        // caz in care nu avem legatura cu punctul final
+        if (randomPoints.stream().noneMatch(e -> e.point.equals(StartAndTargetNode.get(1).point))) {
+            RRTPoints.add(new Node(null, StartAndTargetNode.get(1).point));
+            randomPoints.add(StartAndTargetNode.get(1));
+        }
+
+        for (int i = 0; i < randomPoints.size(); i++) {
+            setMarkers(randomPoints.get(i).point.x, randomPoints.get(i).point.y, i);
+        }
+
+        paintShortestRoadRRT(RRTPoints.get(RRTPoints.size() - 1));
+
+        // colorare puncte start si target
+        drawStartAndTargetPoints(6);
+
+        end = System.nanoTime();
+
         RRTPoints.clear();
+        StartAndTargetNode.clear();
+
+        long result = (end - start) / 1000;
+        System.out.println("RRT STAR " + result);
+
+        return result;
     }
 
 
     public void connect(List<String> listConnectedPoints) {
-
         for (int j = 0; j < PRMPoints.size(); j++) {
             NodeAStar intermediar;
+            //setting euristics
             if (PRMPoints.get(j).x < 370) {
                 intermediar = new NodeAStar(1.0, j);
             } else if (PRMPoints.get(j).x >= 370 && PRMPoints.get(j).x < 590) {
@@ -860,6 +949,21 @@ public class MotionSpace extends Canvas {
         randomPoints.add(new Node(null, StartAndTargetNode.get(1).point));
 
         for (int j = 0; j < PRMPoints.size(); j++) {
+            NodeAStar intermediar;
+            //setting euristics
+            if (PRMPoints.get(j).x < 370) {
+                intermediar = new NodeAStar(1.0, j);
+            } else if (PRMPoints.get(j).x >= 370 && PRMPoints.get(j).x < 590) {
+                intermediar = new NodeAStar(2.0, j);
+            } else if (PRMPoints.get(j).x >= 590 && PRMPoints.get(j).x < 632) {
+                intermediar = new NodeAStar(3.0, j);
+            } else
+                intermediar = new NodeAStar(4.0, j);
+
+            listAStar.add(intermediar);
+        }
+
+        for (int j = 0; j < PRMPoints.size(); j++) {
             Point2D point = PRMPoints.get(j);
 
             List<Point2D> closest = new ArrayList<>();
@@ -869,7 +973,6 @@ public class MotionSpace extends Canvas {
                 closest.add(null);
                 closestDist.add(99999.0);
             }
-
 
             for (int k = 0; k < PRMPoints.size(); k++) {
                 Point2D p = PRMPoints.get(k);
@@ -889,6 +992,7 @@ public class MotionSpace extends Canvas {
                     listConnectedPoints.add("" + (char) ((int) 'A' + k) + (char) ((int) 'A' + j));
 
                     double dist = Math.sqrt((p.x - point.x) * (p.x - point.x) + (p.y - point.y) * (p.y - point.y));
+                    listAStar.get(j).addBranch((int) dist, listAStar.get(k));
 
                     for (int i = 0; i < numOfConnections; i++) {
 
@@ -908,7 +1012,8 @@ public class MotionSpace extends Canvas {
                 if (close != null) {
                     GraphicsContext g = getGraphicsContext2D();
 
-                    g.setStroke(Color.BLACK);
+                    g.setStroke(Color.ROYALBLUE);
+                    g.setLineWidth(6);
                     g.strokeLine(close.x, close.y, point.x, point.y);
 
                     //edges.add(close);
@@ -995,6 +1100,7 @@ public class MotionSpace extends Canvas {
             public NodeAStar node;
         }
 
+        // adauga costul ptr nodul ce trebuie adaugat
         public void addBranch(int weight, NodeAStar node) {
             Edge newEdge = new Edge(weight, node);
             neighbors.add(newEdge);
@@ -1070,8 +1176,11 @@ public class MotionSpace extends Canvas {
         }
     }
 
-    private void repaintRRT() {
+    private void repaintRRT(List<Node> randomPoints, List<String> listConnectedPoints) {
         paintBackground();
+        randomPoints.clear();
+        listConnectedPoints.clear();
+        randomPoints.addAll(RRTPoints);
 
         GraphicsContext g = getGraphicsContext2D();
         int d = 6;
@@ -1081,14 +1190,19 @@ public class MotionSpace extends Canvas {
             g.fillOval(n.point.x - d, n.point.y - d, 2 * d, 2 * d);
         }
 
-        g.setStroke(Color.BLACK);
-        for (Node n : RRTPoints) {
+        g.setStroke(Color.ROYALBLUE);
+
+        for (int j = 0; j < RRTPoints.size(); j++) {
+            Node n = RRTPoints.get(j);
             if (n.parent != null) {
                 if (isGoal(n)) {
-                    g.setStroke(Color.BLACK);
+                    g.setLineWidth(6);
+                    g.setStroke(Color.ROYALBLUE);
                     g.strokeLine(StartAndTargetNode.get(1).point.x, StartAndTargetNode.get(1).point.y, n.point.x, n.point.y);
+                    listConnectedPoints.add("" + (char) ((int) 'A' + positionForClosestPoint(RRTPoints, n.parent)) + (char) ((int) 'A' + j));
                 }
                 g.strokeLine(n.point.x, n.point.y, n.parent.point.x, n.parent.point.y);
+                listConnectedPoints.add("" + (char) ((int) 'A' + positionForClosestPoint(RRTPoints, n.parent)) + (char) ((int) 'A' + j));
             }
         }
 
@@ -1097,7 +1211,7 @@ public class MotionSpace extends Canvas {
         g.fillOval(StartAndTargetNode.get(1).point.x - d, StartAndTargetNode.get(1).point.y - d, 2 * d, 2 * d);
 
         // draw the start point
-        g.setFill(Color.HOTPINK);
+        g.setFill(Color.RED);
         g.fillOval(StartAndTargetNode.get(0).point.x - d, StartAndTargetNode.get(0).point.y - d, 2 * d, 2 * d);
     }
 
@@ -1146,7 +1260,7 @@ public class MotionSpace extends Canvas {
 
     private void drawStartAndTargetPoints(int width) {
         GraphicsContext g = getGraphicsContext2D();
-        g.setFill(Color.HOTPINK);
+        g.setFill(Color.RED);
         g.fillOval(StartAndTargetNode.get(0).point.x - width, StartAndTargetNode.get(0).point.y - width, 2 * width, 2 * width);
 
         // target
@@ -1215,8 +1329,8 @@ public class MotionSpace extends Canvas {
     }
 
     public void generateStartAndTarget() {
-        StartAndTargetNode.add(new Node(null, new Point2D(100, 200)));
-        StartAndTargetNode.add(new Node(null, new Point2D(600, 270)));
+        StartAndTargetNode.add(new Node(null, new Point2D(240, 260)));
+        StartAndTargetNode.add(new Node(null, new Point2D(370, 450)));
     }
 
     private boolean isGoal(Node node) {

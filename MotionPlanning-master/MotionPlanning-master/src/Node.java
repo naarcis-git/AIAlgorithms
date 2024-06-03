@@ -7,6 +7,7 @@ public class Node {
     public double distance;
 
     public double helper = 0;
+    // TODO: 01/06/2024 ADD number CRITERIA for algorithms , like n!!
 
     public Node(Node parent, Point2D point){
         this.parent = parent;
