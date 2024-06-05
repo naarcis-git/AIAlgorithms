@@ -2,12 +2,9 @@ import com.sun.javafx.geom.Point2D;
 import javafx.event.Event;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
-import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
-import javafx.scene.paint.Color;
-import javafx.scene.text.Font;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -15,7 +12,7 @@ import java.util.stream.Stream;
 
 public class UserPanel extends VBox {
 
-    int x, y;
+//    int x, y;
 
     List<Node> StartAndTargetNode = new ArrayList<>();
     Map<String, Integer> distanceNodes = new HashMap<>();
@@ -25,13 +22,16 @@ public class UserPanel extends VBox {
     List<Node> randomPoints = new ArrayList<>();
 
     private ComboBox strategyBox;
+    private ComboBox pointNrBox;
     private ComboBox obstacleSet;
 
+    private int n;
     private long timeValue;
 
     private TextField textFieldErrorMessage;
     private TextField textFieldTime;
 
+    private Label labelError;
     private Label labelTime;
 
     private enum Strategy {
@@ -66,18 +66,18 @@ public class UserPanel extends VBox {
         HBox addition = new HBox();
         Button addOne = new Button("Case 1");
         addOne.setOnMouseClicked(event -> {
+            StartAndTargetNode.clear();
             StartAndTargetNode.add(new Node(null, new Point2D(240, 260)));
             StartAndTargetNode.add(new Node(null, new Point2D(370, 450)));
             if (!handleExceptionCase())
                 return;
             setDefaultValueForObstacles();
-            CoordonateAlgorithms.setStartAndTargetNode(StartAndTargetNode);
 
             if (strategy == Strategy.PRM) {
                 space.createObstacles();
 
                 CoordonateAlgorithms.setGeneratedPoint(generatePrmInput());
-                timeValue = space.addPRM(listConnectedPoints);
+                timeValue = space.addPRM(listConnectedPoints, StartAndTargetNode);
                 textFieldTime.setText(String.valueOf(timeValue));
 
                 listConnectedPoints.forEach(e -> {
@@ -92,7 +92,7 @@ public class UserPanel extends VBox {
                 space.createObstacles();
 
                 CoordonateAlgorithms.setGeneratedPoint(generateRRTInput());
-                timeValue = space.addRRT(listConnectedPoints);
+                timeValue = space.addRRT(listConnectedPoints, StartAndTargetNode);
                 textFieldTime.setText(String.valueOf(timeValue));
 
                 distanceNodes.keySet().removeIf(e -> !listConnectedPoints.contains(e));
@@ -103,7 +103,7 @@ public class UserPanel extends VBox {
                 space.createObstacles();
 
                 CoordonateAlgorithms.setGeneratedPoint(generateRRTInput());
-                timeValue = space.addRRTStar(listConnectedPoints);
+                timeValue = space.addRRTStar(listConnectedPoints, StartAndTargetNode);
                 textFieldTime.setText(String.valueOf(timeValue));
 
                 distanceNodes.keySet().removeIf(e -> !listConnectedPoints.contains(e));
@@ -114,6 +114,7 @@ public class UserPanel extends VBox {
 
         Button addTwo = new Button("Case 2");
         addTwo.setOnMouseClicked(event -> {
+            StartAndTargetNode.clear();
             StartAndTargetNode.add(new Node(null, new Point2D(240, 260)));
             StartAndTargetNode.add(new Node(null, new Point2D(370, 450)));
             if (!handleExceptionCase())
@@ -121,12 +122,11 @@ public class UserPanel extends VBox {
 
             setDefaultValueForObstacles();
 
-            CoordonateAlgorithms.setStartAndTargetNode(StartAndTargetNode);
             if (strategy == Strategy.PRM) {
                 space.createObstacles();
 
                 CoordonateAlgorithms.setGeneratedPoint(generatePrmInputForCase2());
-                timeValue = space.addPRM(listConnectedPoints);
+                timeValue = space.addPRM(listConnectedPoints, StartAndTargetNode);
                 textFieldTime.setText(String.valueOf(timeValue));
 
                 listConnectedPoints.forEach(e -> {
@@ -141,7 +141,7 @@ public class UserPanel extends VBox {
                 space.createObstacles();
 
                 CoordonateAlgorithms.setGeneratedPoint(generateRRTInputForCase2());
-                timeValue = space.addRRT(listConnectedPoints);
+                timeValue = space.addRRT(listConnectedPoints, StartAndTargetNode);
                 textFieldTime.setText(String.valueOf(timeValue));
 
                 distanceNodes.keySet().removeIf(e -> !listConnectedPoints.contains(e));
@@ -152,7 +152,7 @@ public class UserPanel extends VBox {
                 space.createObstacles();
 
                 CoordonateAlgorithms.setGeneratedPoint(generateRRTInputForCase2());
-                timeValue = space.addRRTStar(listConnectedPoints);
+                timeValue = space.addRRTStar(listConnectedPoints, StartAndTargetNode);
                 textFieldTime.setText(String.valueOf(timeValue));
 
                 distanceNodes.keySet().removeIf(e -> !listConnectedPoints.contains(e));
@@ -164,19 +164,19 @@ public class UserPanel extends VBox {
 
         Button addThree = new Button("Case 3");
         addThree.setOnMouseClicked(event -> {
+            StartAndTargetNode.clear();
             StartAndTargetNode.add(new Node(null, new Point2D(240, 260)));
-            StartAndTargetNode.add(new Node(null, new Point2D(370, 450)));
+            StartAndTargetNode.add(new Node(null, new Point2D(StartAndTargetNode.get(0).point.x + 696, StartAndTargetNode.get(0).point.y + 167)));
             if (!handleExceptionCase())
                 return;
 
             setDefaultValueForObstacles();
 
-            CoordonateAlgorithms.setStartAndTargetNode(StartAndTargetNode);
             if (strategy == Strategy.PRM) {
                 space.createObstacles();
 
                 CoordonateAlgorithms.setGeneratedPoint(generatePrmInputForCase3());
-                timeValue = space.addPRM(listConnectedPoints);
+                timeValue = space.addPRM(listConnectedPoints, StartAndTargetNode);
                 textFieldTime.setText(String.valueOf(timeValue));
 
                 listConnectedPoints.forEach(e -> {
@@ -191,7 +191,7 @@ public class UserPanel extends VBox {
                 space.createObstacles();
 
                 CoordonateAlgorithms.setGeneratedPoint(generateRRTInputForCase3());
-                timeValue = space.addRRT(listConnectedPoints);
+                timeValue = space.addRRT(listConnectedPoints, StartAndTargetNode);
                 textFieldTime.setText(String.valueOf(timeValue));
 
                 distanceNodes.keySet().removeIf(e -> !listConnectedPoints.contains(e));
@@ -202,7 +202,7 @@ public class UserPanel extends VBox {
                 space.createObstacles();
 
                 CoordonateAlgorithms.setGeneratedPoint(generateRRTInputForCase3());
-                timeValue = space.addRRTStar(listConnectedPoints);
+                timeValue = space.addRRTStar(listConnectedPoints, StartAndTargetNode);
                 textFieldTime.setText(String.valueOf(timeValue));
 
                 distanceNodes.keySet().removeIf(e -> !listConnectedPoints.contains(e));
@@ -215,6 +215,7 @@ public class UserPanel extends VBox {
 
         Button addFour = new Button("Case 4");
         addFour.setOnMouseClicked(event -> {
+            StartAndTargetNode.clear();
             StartAndTargetNode.add(new Node(null, new Point2D(240, 260)));
             StartAndTargetNode.add(new Node(null, new Point2D(370, 450)));
             if (!handleExceptionCase4())
@@ -225,13 +226,11 @@ public class UserPanel extends VBox {
             // action
             space.setObstacles(3);
 
-
-            CoordonateAlgorithms.setStartAndTargetNode(StartAndTargetNode);
             if (strategy == Strategy.PRM) {
                 space.createObstacles();
 
                 CoordonateAlgorithms.setGeneratedPoint(generatePrmInputForCase4());
-                timeValue = space.addPRM(listConnectedPoints);
+                timeValue = space.addPRM(listConnectedPoints, StartAndTargetNode);
                 textFieldTime.setText(String.valueOf(timeValue));
 
                 listConnectedPoints.forEach(e -> {
@@ -246,7 +245,7 @@ public class UserPanel extends VBox {
                 space.createObstacles();
 
                 CoordonateAlgorithms.setGeneratedPoint(generateRRTInputForCase4());
-                timeValue = space.addRRT(listConnectedPoints);
+                timeValue = space.addRRT(listConnectedPoints, StartAndTargetNode);
                 textFieldTime.setText(String.valueOf(timeValue));
 
                 distanceNodes.keySet().removeIf(e -> !listConnectedPoints.contains(e));
@@ -257,7 +256,7 @@ public class UserPanel extends VBox {
                 space.createObstacles();
 
                 CoordonateAlgorithms.setGeneratedPoint(generateRRTInputForCase4());
-                timeValue = space.addRRTStar(listConnectedPoints);
+                timeValue = space.addRRTStar(listConnectedPoints, StartAndTargetNode);
                 textFieldTime.setText(String.valueOf(timeValue));
 
                 distanceNodes.keySet().removeIf(e -> !listConnectedPoints.contains(e));
@@ -269,11 +268,14 @@ public class UserPanel extends VBox {
 
         Button randomRRT = new Button("Random");
         randomRRT.setOnMouseClicked(event -> {
+            StartAndTargetNode.clear();
+            StartAndTargetNode.add(new Node(null, new Point2D(240, 260)));
+            StartAndTargetNode.add(new Node(null, new Point2D(370, 450)));
+
             setDefaultValueForObstacles();
-            CoordonateAlgorithms.setStartAndTargetNode(StartAndTargetNode);
             space.createObstacles();
             if (strategy == Strategy.PRM) {
-                timeValue = space.addPRMRandom(listConnectedPoints, randomPoints);
+                timeValue = space.addPRMRandom(listConnectedPoints, randomPoints, n, StartAndTargetNode);
                 textFieldTime.setText(String.valueOf(timeValue));
 
                 measurement(randomPoints);
@@ -284,7 +286,7 @@ public class UserPanel extends VBox {
                 randomPoints.clear();
             }
             if (strategy == Strategy.RRT) {
-                timeValue = space.addRRTRandom(listConnectedPoints, randomPoints);
+                timeValue = space.addRRTRandom(listConnectedPoints, randomPoints, n, StartAndTargetNode);
                 textFieldTime.setText(String.valueOf(timeValue));
 
                 measurement(randomPoints);
@@ -294,7 +296,7 @@ public class UserPanel extends VBox {
                 drawDistancePoints();
                 randomPoints.clear();
             } else if (strategy == Strategy.RRTstar) {
-                timeValue = space.addRRTStarRandom(listConnectedPoints, randomPoints);
+                timeValue = space.addRRTStarRandom(listConnectedPoints, randomPoints, n,StartAndTargetNode);
                 textFieldTime.setText(String.valueOf(timeValue));
 
                 measurement(randomPoints);
@@ -306,14 +308,30 @@ public class UserPanel extends VBox {
             }
         });
 
-        textFieldErrorMessage = new TextField();
-        textFieldErrorMessage.setMaxWidth(500);
-        textFieldErrorMessage.setMaxHeight(100);
-        textFieldErrorMessage.setAlignment(Pos.CENTER);
-        textFieldErrorMessage.setEditable(false);
+        HBox slider = new HBox();
 
-        addition.getChildren().addAll(addOne, addTwo, addThree, addFour, randomRRT);
+        Label label = new Label("RRT Random Increment:  ");
+
+        Slider multiplierSlider = new Slider();
+        multiplierSlider.setMin(100);
+        multiplierSlider.setMax(300);
+        multiplierSlider.setValue(120);
+        multiplierSlider.setShowTickLabels(true);
+        multiplierSlider.setShowTickMarks(true);
+        multiplierSlider.setMajorTickUnit(2);
+        multiplierSlider.setMinorTickCount(1);
+        multiplierSlider.setBlockIncrement(10);
+        multiplierSlider.valueProperty().addListener((observable, oldValue, newValue) -> {
+            space.setRRTMultiplier(newValue.intValue());
+        });
+        multiplierSlider.setPrefWidth(300);
+        slider.getChildren().addAll(label, multiplierSlider);
+        //setting placement for button
+        slider.setPadding(new Insets(0, 0, 0, 100));
+
+        addition.getChildren().addAll(addOne, addTwo, addThree, addFour, randomRRT, slider);
         addition.setSpacing(5);
+
 
         Button clear = new Button("Clear Space");
         clear.setOnMouseClicked(event -> {
@@ -329,34 +347,43 @@ public class UserPanel extends VBox {
                 "Rapidly Expanding Random Tree Star"
         );
 
-        labelTime = new Label("Time");
+        pointNrBox = new ComboBox();
+        pointNrBox.setPromptText("Point number");
+        pointNrBox.setOnAction(this::updatePointNr);
+        pointNrBox.getItems().addAll(
+                "4",
+                "5",
+                "20"
+        );
 
+        // textField for error
+        labelError = new Label("Error");
+        textFieldErrorMessage = new TextField();
+        textFieldErrorMessage.setMaxWidth(900);
+        textFieldErrorMessage.setMaxHeight(100);
+        textFieldErrorMessage.setAlignment(Pos.CENTER);
+        textFieldErrorMessage.setEditable(false);
+
+        // textField for time
+        labelTime = new Label("Time");
         textFieldTime = new TextField();
         textFieldTime.setMaxWidth(500);
         textFieldTime.setMaxHeight(100);
         textFieldTime.setAlignment(Pos.CENTER);
         textFieldTime.setEditable(false);
 
-        HBox slider = new HBox();
+        HBox boxWithTextFields = new HBox(20);
+        boxWithTextFields.getChildren().addAll(labelError, textFieldErrorMessage, labelTime, textFieldTime);
+        boxWithTextFields.setPadding(new Insets(0, 0, 0, 310));
 
-        Label label = new Label("RRT Random Increment:  ");
+        HBox clearAndTextFields = new HBox();
+        //setting placement for button
+        clearAndTextFields.getChildren().addAll(clear, boxWithTextFields);
 
-        Slider multiplierSlider = new Slider();
-        multiplierSlider.setMin(0);
-        multiplierSlider.setMax(100);
-        multiplierSlider.setValue(10);
-        multiplierSlider.setShowTickLabels(true);
-        multiplierSlider.setShowTickMarks(true);
-        multiplierSlider.setMajorTickUnit(2);
-        multiplierSlider.setMinorTickCount(1);
-        multiplierSlider.setBlockIncrement(10);
-        multiplierSlider.valueProperty().addListener((observable, oldValue, newValue) -> {
-            space.setRRTMultiplier(newValue.intValue());
-        });
-        multiplierSlider.setPrefWidth(300);
-        slider.getChildren().addAll(label, multiplierSlider);
+        HBox comboBoxList = new HBox();
+        comboBoxList.getChildren().addAll(strategyBox, obstacleSet, pointNrBox);
 
-        this.getChildren().addAll(addition, clear, strategyBox, obstacleSet, textFieldErrorMessage, labelTime, textFieldTime, slider);
+        this.getChildren().addAll(addition, clearAndTextFields, comboBoxList);
 
         this.setSpacing(5);
         this.setPadding(new Insets(10));
@@ -377,6 +404,12 @@ public class UserPanel extends VBox {
         else if (strategyBox.getValue().equals("Rapidly Expanding Random Tree Star")) strategy = Strategy.RRTstar;
     }
 
+    private void updatePointNr(Event event) {
+        if (pointNrBox.getValue().equals("4")) n = 4;
+        else if (pointNrBox.getValue().equals("5")) n = 5;
+        else if (pointNrBox.getValue().equals("20")) n = 20;
+    }
+
     public static class CoordonateAlgorithms {
         public static List<Node> generatedPoint;
         public static List<Node> StartAndTargetNode;
@@ -387,14 +420,6 @@ public class UserPanel extends VBox {
 
         public static void setGeneratedPoint(List<Node> generated) {
             generatedPoint = generated;
-        }
-
-        public static List<Node> getStartAndTargetNode() {
-            return StartAndTargetNode;
-        }
-
-        public static void setStartAndTargetNode(List<Node> startAndTargetNode) {
-            StartAndTargetNode = startAndTargetNode;
         }
     }
 
@@ -465,8 +490,10 @@ public class UserPanel extends VBox {
         generatedPoint.add(new Node(null, new Point2D(StartAndTargetNode.get(0).point.x, StartAndTargetNode.get(0).point.y)));
         generatedPoint.add(new Node(null, new Point2D(StartAndTargetNode.get(0).point.x + 176, StartAndTargetNode.get(0).point.y - 154)));
         generatedPoint.add(new Node(null, new Point2D(StartAndTargetNode.get(0).point.x + 392, StartAndTargetNode.get(0).point.y - 65)));
+        //new d
+        generatedPoint.add(new Node(null, new Point2D(StartAndTargetNode.get(0).point.x + 500, StartAndTargetNode.get(0).point.y + 189)));
+//puntul new target
         generatedPoint.add(new Node(null, new Point2D(StartAndTargetNode.get(0).point.x + 696, StartAndTargetNode.get(0).point.y + 167)));
-        generatedPoint.add(new Node(null, new Point2D(StartAndTargetNode.get(0).point.x + 130, StartAndTargetNode.get(0).point.y + 189)));
         measurement(generatedPoint);
 
         return generatedPoint;
@@ -476,9 +503,10 @@ public class UserPanel extends VBox {
         List<Node> generatedPoint = new ArrayList<>();
         generatedPoint.add(new Node(null, new Point2D(StartAndTargetNode.get(0).point.x + 176, StartAndTargetNode.get(0).point.y - 154)));
         generatedPoint.add(new Node(null, new Point2D(StartAndTargetNode.get(0).point.x + 392, StartAndTargetNode.get(0).point.y - 65)));
+        //new d
+        generatedPoint.add(new Node(null, new Point2D(StartAndTargetNode.get(0).point.x + 500, StartAndTargetNode.get(0).point.y + 189)));
+//puntul new target
         generatedPoint.add(new Node(null, new Point2D(StartAndTargetNode.get(0).point.x + 696, StartAndTargetNode.get(0).point.y + 167)));
-        //target
-        generatedPoint.add(new Node(null, new Point2D(StartAndTargetNode.get(0).point.x + 130, StartAndTargetNode.get(0).point.y + 189)));
 
         measurement(
                 Stream.of(
@@ -609,15 +637,5 @@ public class UserPanel extends VBox {
 
         return ok;
     }
-
-//    public void paint(GraphicsContext g) {
-//        g.setFont(new Font("Monospaced", 20));
-//        g.setFill(Color.RED);
-//        g.fillOval(x, y, 10, 10);
-////        g.(x + "," + y, x + 10, y - 10);
-////        g.drawString(str, x + 10, y + 20);
-////        showStatus(str + " at " + x + "," + y);
-//    }
-
 }
 

@@ -10,7 +10,7 @@ public class Main extends Application {
 
     @Override
     public void start(Stage primaryStage) {
-        int size = 650;
+        int size = 800;
         int bSize = 10;
         VBox root = new VBox();
 
@@ -24,7 +24,7 @@ public class Main extends Application {
         root.getChildren().addAll(panel, border);
 
         primaryStage.setResizable(false);
-        primaryStage.setScene(new Scene(root, 900 + bSize*2,   size + bSize*2));
+        primaryStage.setScene(new Scene(root, 1050 + bSize * 2,   size -110));
         primaryStage.show();
     }
 
