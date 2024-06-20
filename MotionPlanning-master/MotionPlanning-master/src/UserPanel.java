@@ -431,13 +431,13 @@ public class UserPanel extends VBox {
 
                 measurement(randomPoints);
                 //case expection
-//                if (distanceNodes)
-                distanceNodes.keySet().removeIf(e -> !listConnectedPoints.contains(e));
+                List<String> edgePoints = listConnectedPoints.stream().filter(e -> !distanceNodes.containsKey(e)).collect(Collectors.toList());
+                distanceNodes.keySet().removeIf(e -> (!listConnectedPoints.contains(e) && !edgePoints.contains(e)));
 
                 // calculate the total distance
                 roadDistanceDecimalResult = roundTo2Decimals(calculateDistanceSum(new ArrayList<>(distanceNodes.values())));
                 totalDistanceTextField.setText(String.valueOf(roadDistanceDecimalResult));
-                distanceCoordinateNodes.keySet().removeIf(e -> !listConnectedPoints.contains(e));
+                distanceCoordinateNodes.keySet().removeIf(e -> !listConnectedPoints.contains(e) && !edgePoints.contains(e));
 
                 drawDistancePoints();
                 randomPoints.clear();
@@ -449,7 +449,7 @@ public class UserPanel extends VBox {
         Label label = new Label("RRT Random Increment:  ");
 
         multiplierSlider.setMin(100);
-        multiplierSlider.setMax(300);
+        multiplierSlider.setMax(200);
         multiplierSlider.setValue(120);
         multiplierSlider.setShowTickLabels(true);
         multiplierSlider.setShowTickMarks(true);
@@ -715,8 +715,6 @@ public class UserPanel extends VBox {
     public List<Node> generateRRTInputForCase4() {
         List<Node> generatedPoint = new ArrayList<>();
         //start
-//        generatedPoint.add(new Node(null, new Point2D(StartAndTargetNode.get(0).point.x, StartAndTargetNode.get(0).point.y)));
-
 //        de sus
         generatedPoint.add(new Node(null, new Point2D(365, 100)));
 //        generatedPoint.add(new Node(null, new Point2D(350, 140)));
@@ -743,8 +741,6 @@ public class UserPanel extends VBox {
         generatedPoint.add(new Node(null, new Point2D(670, 465)));
         //punctul d
         generatedPoint.add(new Node(null, new Point2D(670, 265)));
-//        generatedPoint.add(new Node(null, new Point2D(595, 515)));// punct unde se vede rrt star recalculat!
-//        generatedPoint.add(new Node(null, new Point2D(555, 515))); // punct initial pt care "?" de pe foaie
 //target
         generatedPoint.add(new Node(null, new Point2D(940, 280)));
 
